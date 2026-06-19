@@ -1200,7 +1200,10 @@ function openModal(token) {
   metaRows.push({ label: 'Contract', value: shortHash(token.fa?.contract), link: `https://tzkt.io/${token.fa?.contract}` });
   metaRows.push({ label: 'Token ID', value: token.token_id });
   if (token.artifact_uri) {
-    metaRows.push({ label: 'Full Resolution', value: 'View on IPFS', link: ipfsToHttp(token.artifact_uri) });
+    const fullResUrl = token.artifact_uri.startsWith('ipfs://')
+      ? `https://cloudflare-ipfs.com/ipfs/${token.artifact_uri.slice(7)}`
+      : token.artifact_uri;
+    metaRows.push({ label: 'Full Resolution', value: 'View original file', link: fullResUrl, newTab: true });
   }
 
   metaRows.forEach(row => {
@@ -1716,7 +1719,7 @@ document.getElementById('filter-group').addEventListener('click', e => {
 // ─────────────────────────────────────────────
 function ipfsToHttp(uri) {
   if (!uri) return '';
-  if (uri.startsWith('ipfs://')) return 'https://ipfs.io/ipfs/' + uri.slice(7);
+  if (uri.startsWith('ipfs://')) return 'https://cloudflare-ipfs.com/ipfs/' + uri.slice(7);
   return uri;
 }
 
