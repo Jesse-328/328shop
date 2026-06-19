@@ -43,8 +43,9 @@ export default async function handler(req) {
         : '328 Photography — NFT Shop';
       if (token.display_uri) {
         const uri = token.display_uri;
+        // Use Cloudflare IPFS gateway which is faster and more reliable for crawlers
         tokenImage = uri.startsWith('ipfs://')
-          ? `https://ipfs.io/ipfs/${uri.slice(7)}`
+          ? `https://cloudflare-ipfs.com/ipfs/${uri.slice(7)}`
           : uri;
       }
     }
