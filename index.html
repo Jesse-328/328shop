@@ -1175,10 +1175,6 @@ function openModal(token) {
 
   modalMediaWrap.insertBefore(mediaEl, fullscreenBtnEl);
 
-  // Store artifact URL on fullscreen button for high-res view
-  fullscreenBtnEl.dataset.artifactUrl = artifactUrl;
-  fullscreenBtnEl.dataset.isVideo = isVideo;
-
   // Title
   modalTitle.textContent = token.name || 'Untitled';
 
@@ -1199,12 +1195,6 @@ function openModal(token) {
   }
   metaRows.push({ label: 'Contract', value: shortHash(token.fa?.contract), link: `https://tzkt.io/${token.fa?.contract}` });
   metaRows.push({ label: 'Token ID', value: token.token_id });
-  if (token.artifact_uri) {
-    const fullResUrl = token.artifact_uri.startsWith('ipfs://')
-      ? `https://cloudflare-ipfs.com/ipfs/${token.artifact_uri.slice(7)}`
-      : token.artifact_uri;
-    metaRows.push({ label: 'Full Resolution', value: 'View original file', link: fullResUrl, newTab: true });
-  }
 
   metaRows.forEach(row => {
     const div = document.createElement('div');
