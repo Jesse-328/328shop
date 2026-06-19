@@ -1199,6 +1199,9 @@ function openModal(token) {
   }
   metaRows.push({ label: 'Contract', value: shortHash(token.fa?.contract), link: `https://tzkt.io/${token.fa?.contract}` });
   metaRows.push({ label: 'Token ID', value: token.token_id });
+  if (token.artifact_uri) {
+    metaRows.push({ label: 'Full Resolution', value: 'View on IPFS', link: ipfsToHttp(token.artifact_uri) });
+  }
 
   metaRows.forEach(row => {
     const div = document.createElement('div');
@@ -1354,25 +1357,8 @@ function openTokenFromPath() {
 fullscreenBtn.addEventListener('click', () => {
   const el = modalMediaWrap.querySelector('img, video');
   if (!el) return;
-
-  const artifactUrl = fullscreenBtn.dataset.artifactUrl;
   const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
-
-  if (artifactUrl && el.tagName === 'IMG' && el.src !== artifactUrl) {
-    // Load full res first, then go fullscreen once loaded
-    const fullResImg = new Image();
-    fullResImg.onload = () => {
-      el.src = artifactUrl;
-      if (req) req.call(el);
-    };
-    fullResImg.onerror = () => {
-      // If full res fails, just go fullscreen with what we have
-      if (req) req.call(el);
-    };
-    fullResImg.src = artifactUrl;
-  } else {
-    if (req) req.call(el);
-  }
+  if (req) req.call(el);
 });
 
 // ─────────────────────────────────────────────
