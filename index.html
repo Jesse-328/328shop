@@ -1134,8 +1134,15 @@ function openModal(token) {
   const listed = token.listings_active && token.listings_active.length > 0;
   const price = listed ? (token.listings_active[0].price / MUTEZ).toFixed(2) : null;
   const mime = token.mime || '';
+
+  // Use display_uri for fast loading in modal, fall back to artifact_uri
+  const displayUrl = ipfsToHttp(token.display_uri || token.artifact_uri);
   const artifactUrl = ipfsToHttp(token.artifact_uri || token.display_uri);
   const isVideo = mime.includes('video') || artifactUrl.match(/\.(mp4|webm|mov|ogv)(\?|$)/i);
+
+  // Use display_uri for images (faster), artifact_uri for video (needs original)
+  const modalMediaUrl = isVideo ? artifactUrl : displayUrl;
+
   const editions = token.supply || 0;
   const objktUrl = `https://objkt.com/tokens/${token.fa?.contract}/${token.token_id}`;
 
@@ -1149,7 +1156,7 @@ function openModal(token) {
   let mediaEl;
   if (isVideo) {
     mediaEl = document.createElement('video');
-    mediaEl.src = artifactUrl;
+    mediaEl.src = modalMediaUrl;
     mediaEl.controls = true;
     mediaEl.autoplay = true;
     mediaEl.muted = true;
@@ -1159,7 +1166,7 @@ function openModal(token) {
     mediaEl.style.objectFit = 'contain';
   } else {
     mediaEl = document.createElement('img');
-    mediaEl.src = artifactUrl;
+    mediaEl.src = modalMediaUrl;
     mediaEl.alt = token.name || 'Token';
     mediaEl.style.width = '100%';
     mediaEl.style.height = '100%';
@@ -1167,6 +1174,10 @@ function openModal(token) {
   }
 
   modalMediaWrap.insertBefore(mediaEl, fullscreenBtnEl);
+
+  // Store artifact URL on fullscreen button for high-res view
+  fullscreenBtnEl.dataset.artifactUrl = artifactUrl;
+  fullscreenBtnEl.dataset.isVideo = isVideo;
 
   // Title
   modalTitle.textContent = token.name || 'Untitled';
@@ -1343,6 +1354,13 @@ function openTokenFromPath() {
 fullscreenBtn.addEventListener('click', () => {
   const el = modalMediaWrap.querySelector('img, video');
   if (!el) return;
+
+  // Switch to full resolution artifact before going fullscreen
+  const artifactUrl = fullscreenBtn.dataset.artifactUrl;
+  if (artifactUrl && el.src !== artifactUrl) {
+    el.src = artifactUrl;
+  }
+
   const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
   if (req) req.call(el);
 });
