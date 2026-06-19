@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>328 Photography — Shop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/@taquito/taquito@16.2.0/dist/taquito.min.js"></script>
+  <script src="https://unpkg.com/@airgap/beacon-sdk@4.2.0/dist/walletbeacon.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0e0e;
+      --surface: #161616;
+      --surface2: #1f1f1f;
+      --border: #2a2a2a;
+      --text: #e8e8e8;
+      --text-muted: #888;
+      --text-faint: #555;
+      --accent: #e8e8e8;
+      --btn-bg: #ffffff;
+      --btn-text: #0e0e0e;
+      --tag-not-listed: #2a2a2a;
+      --tag-not-listed-text: #888;
+      --radius-btn: 999px;
+      --radius-card: 4px;
+      --font: 'DM Sans', sans-serif;
+      --transition: 0.2s ease;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-weight: 300;
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .site-title {
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .site-title span { color: var(--text-muted); }
+
+    /* ── WALLET AREA ── */
+    .wallet-area {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .wallet-info {
+      display: none;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 1px;
+    }
+
+    .wallet-info.visible { display: flex; }
+
+    .wallet-address {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      font-weight: 400;
+    }
+
+    .wallet-balance {
+      font-size: 12px;
+      color: var(--text);
+      font-weight: 400;
+    }
+
+    #connect-btn {
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      border: none;
+      border-radius: var(--radius-btn);
+      padding: 7px 18px;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: opacity var(--transition);
+      white-space: nowrap;
+    }
+
+    #connect-btn:hover { opacity: 0.85; }
+    #connect-btn.connected { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 32px 80px;
+    }
+
+    /* ── CONTROLS ── */
+    .controls {
+      margin-bottom: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .control-label {
+      font-size: 11px;
+      color: var(--text-faint);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      width: 36px;
+      flex-shrink: 0;
+    }
+
+    .pill-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-btn);
+      padding: 5px 14px;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all var(--transition);
+      letter-spacing: 0.02em;
+    }
+
+    .pill:hover { border-color: #555; color: var(--text); }
+    .pill.active { background: var(--btn-bg); color: var(--btn-text); border-color: var(--btn-bg); font-weight: 500; }
+
+    #filter-owned { display: none; }
+
+    /* ── GRID ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover { transform: translateY(-2px); }
+
+    .card-media {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      background: var(--surface2);
+    }
+
+    .card-media img,
+    .card-media video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-info {
+      padding: 12px 14px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .card-bottom {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card-price {
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 400;
+    }
+
+    .tag-not-listed {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-btn);
+      padding: 3px 10px;
+    }
+
+    .tag-primary {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #c8a96e;
+      border: 1px solid #c8a96e55;
+      border-radius: var(--radius-btn);
+      padding: 3px 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tag-primary::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+      animation: shine 2.5s infinite;
+    }
+
+    @keyframes shine {
+      0% { left: -100%; }
+      50% { left: 150%; }
+      100% { left: 150%; }
+    }
+
+    .tag-secondary {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-btn);
+      padding: 3px 10px;
+    }
+
+    .btn-buy-card {
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      border: none;
+      border-radius: var(--radius-btn);
+      padding: 6px 14px;
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity var(--transition);
+      letter-spacing: 0.03em;
+    }
+
+    .btn-buy-card:hover { opacity: 0.85; }
+
+    .enlarge-hint {
+      font-size: 10px;
+      color: var(--text-faint);
+      letter-spacing: 0.06em;
+      text-align: center;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+
+    /* ── SKELETON ── */
+    .skeleton-card {
+      background: var(--surface);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+    }
+
+    .skeleton-img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: var(--surface2);
+      animation: shimmer 1.5s infinite;
+    }
+
+    .skeleton-text {
+      margin: 12px 14px;
+      height: 12px;
+      border-radius: 2px;
+      background: var(--surface2);
+      animation: shimmer 1.5s infinite;
+    }
+
+    .skeleton-text.short { width: 50%; margin-top: 6px; }
+
+    @keyframes shimmer {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
+    }
+
+    /* ── INFINITE SCROLL LOADER ── */
+    #scroll-loader {
+      display: none;
+      justify-content: center;
+      padding: 40px 0 0;
+    }
+
+    #scroll-loader.visible { display: flex; }
+
+    .loader-dots {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .loader-dots span {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--text-faint);
+      animation: dot-pulse 1.2s infinite;
+    }
+
+    .loader-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loader-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes dot-pulse {
+      0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1); }
+    }
+
+    /* ── ERROR STATE ── */
+    #error-state {
+      display: none;
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+    }
+
+    #error-state.visible { display: block; }
+    #error-state p { margin-bottom: 16px; font-size: 13px; }
+    #error-state a { color: var(--text); text-decoration: underline; }
+
+    /* ── EMPTY STATE ── */
+    #empty-state {
+      display: none;
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    #empty-state.visible { display: block; }
+
+    /* ── MODAL ── */
+    #modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    #modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 6px;
+      width: 100%;
+      max-width: 1000px;
+      max-height: 90vh;
+      overflow: hidden;
+      display: flex;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: color var(--transition);
+      line-height: 1;
+    }
+
+    .modal-close:hover { color: var(--text); }
+
+    .modal-left {
+      flex: 0 0 60%;
+      position: relative;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+    }
+
+    .modal-left img,
+    .modal-left video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      max-height: 90vh;
+    }
+
+    .fullscreen-btn {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      width: 30px;
+      height: 30px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      transition: color var(--transition);
+    }
+
+    .fullscreen-btn:hover { color: var(--text); }
+
+    .modal-right {
+      flex: 0 0 40%;
+      padding: 36px 32px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .modal-description {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .modal-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .modal-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+
+    .modal-meta-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .modal-meta-label { color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; font-size: 10px; }
+    .modal-meta-value { color: var(--text); font-weight: 400; }
+    .modal-meta-value.owned { color: #a8c5a0; }
+    .modal-meta-link { color: var(--text); font-weight: 400; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--text-faint); }
+    .modal-meta-link:hover { color: var(--text); text-decoration-color: var(--text); }
+
+    .modal-price {
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--text);
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .btn-primary {
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      border: none;
+      border-radius: var(--radius-btn);
+      padding: 12px 24px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity var(--transition);
+      width: 100%;
+      letter-spacing: 0.03em;
+    }
+
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-btn);
+      padding: 11px 24px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all var(--transition);
+      width: 100%;
+      text-decoration: none;
+      text-align: center;
+      display: block;
+      letter-spacing: 0.03em;
+    }
+
+    .btn-secondary:hover { border-color: #555; color: var(--text); }
+
+    .modal-tag-not-listed {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-btn);
+      padding: 5px 14px;
+      text-align: center;
+    }
+
+    .modal-disclaimer {
+      font-size: 10px;
+      color: var(--text-faint);
+      line-height: 1.6;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+
+    /* ── TX STATUS ── */
+    #tx-status {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 300;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-btn);
+      padding: 10px 20px;
+      font-size: 12px;
+      color: var(--text);
+      white-space: nowrap;
+      letter-spacing: 0.03em;
+    }
+
+    #tx-status.visible { display: block; }
+    #tx-status.success { border-color: #4a7a46; color: #a8c5a0; }
+    #tx-status.error { border-color: #7a4646; color: #c5a0a0; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 32px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-faint);
+      letter-spacing: 0.04em;
+    }
+
+    footer a { color: var(--text-faint); text-decoration: underline; }
+    footer a:hover { color: var(--text-muted); }
+
+    .btn-share {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-btn);
+      padding: 9px 24px;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all var(--transition);
+      width: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      letter-spacing: 0.03em;
+    }
+
+    .btn-share:hover { border-color: #555; color: var(--text); }
+
+    .share-toast {
+      font-size: 11px;
+      color: #a8c5a0;
+      text-align: center;
+      height: 0;
+      overflow: hidden;
+      transition: height 0.2s ease, opacity 0.2s ease;
+      opacity: 0;
+    }
+
+    .share-toast.visible { height: 18px; opacity: 1; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 700px) {
+      header { padding: 0 16px; }
+      main { padding: 24px 16px 60px; }
+
+      .grid { grid-template-columns: 1fr; gap: 16px; }
+
+      .modal { flex-direction: column; max-height: 95vh; overflow-y: auto; }
+      .modal-left { flex: none; min-height: unset; max-height: unset; background: #000; }
+      .modal-left img, .modal-left video { width: 100%; height: auto; max-height: unset; object-fit: contain; display: block; }
+      .modal-right { padding: 24px 20px; }
+      .modal-close { top: 10px; right: 10px; }
+
+      .wallet-info { display: none !important; }
+    }
+
+    @media (max-width: 480px) {
+      .pill { font-size: 11px; padding: 4px 11px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a class="site-title" href="https://328photography.xyz">328 <span>Photography</span></a>
+  <div class="wallet-area">
+    <div class="wallet-info" id="wallet-info">
+      <span class="wallet-address" id="wallet-address-display"></span>
+      <span class="wallet-balance" id="wallet-balance-display"></span>
+    </div>
+    <button id="connect-btn">Connect Wallet</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="control-row">
+      <span class="control-label">Sort</span>
+      <div class="pill-group" id="sort-group">
+        <button class="pill active" data-sort="newest">Newest</button>
+        <button class="pill" data-sort="oldest">Oldest</button>
+        <button class="pill" data-sort="price-asc">Price ↑</button>
+        <button class="pill" data-sort="price-desc">Price ↓</button>
+      </div>
+    </div>
+    <div class="control-row">
+      <span class="control-label">View</span>
+      <div class="pill-group" id="filter-group">
+        <button class="pill active" data-filter="all">All</button>
+        <button class="pill" data-filter="primary">Primary</button>
+        <button class="pill" data-filter="secondary">Secondary</button>
+        <button class="pill" id="filter-owned" data-filter="owned">Owned</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="enlarge-hint">Click any image to enlarge</p>
+
+  <!-- GRID -->
+  <div class="grid" id="grid"></div>
+
+  <!-- STATES -->
+  <div id="scroll-loader"><div class="loader-dots"><span></span><span></span><span></span></div></div>
+  <div id="error-state">
+    <p>Unable to load tokens right now.</p>
+    <a href="https://objkt.com/profile/328jesse/created" target="_blank" rel="noopener">View full collection on Objkt →</a>
+  </div>
+  <div id="empty-state"><p>No tokens found.</p></div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <a href="https://328photography.xyz">328photography.xyz</a> &nbsp;·&nbsp;
+  <a href="https://objkt.com/profile/328jesse/created" target="_blank" rel="noopener">View on Objkt</a>
+</footer>
+
+<!-- MODAL -->
+<div id="modal-overlay" role="dialog" aria-modal="true">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
+
+    <div class="modal-left" id="modal-media-wrap">
+      <!-- media injected here -->
+      <button class="fullscreen-btn" id="fullscreen-btn" title="Fullscreen">⛶</button>
+    </div>
+
+    <div class="modal-right">
+      <h2 class="modal-title" id="modal-title"></h2>
+      <p class="modal-description" id="modal-description"></p>
+
+      <div class="modal-meta" id="modal-meta"></div>
+
+      <div id="modal-price-wrap"></div>
+
+      <div class="modal-actions" id="modal-actions"></div>
+
+      <p class="modal-disclaimer">
+        Purchases are processed via Objkt's marketplace contracts. Platform fees apply.
+        Transactions occur outside this website. By purchasing you agree to Objkt's terms.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- TX STATUS TOAST -->
+<div id="tx-status"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────
+const CREATOR = 'tz1aACaaDefdyjVduoFyUi9Rhde6nsmhHunw';
+const OBJKT_GRAPHQL = 'https://data.objkt.com/v3/graphql';
+const OBJKT_PROFILE = 'https://objkt.com/tokens/';
+const PAGE_SIZE = 20;
+const TEZOS_RPC = 'https://mainnet.smartpy.io';
+const MUTEZ = 1_000_000;
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let allTokens = [];
+let filteredTokens = [];
+let displayedCount = 0;
+let currentSort = 'newest';
+let currentFilter = 'all';
+let walletAddress = null;
+let walletPkh = null;
+let beaconClient = null;
+let taquito = null;
+let currentToken = null;
+let isLoading = false;
+
+// ─────────────────────────────────────────────
+// ELEMENTS
+// ─────────────────────────────────────────────
+const grid = document.getElementById('grid');
+const scrollLoader = document.getElementById('scroll-loader');
+const errorState = document.getElementById('error-state');
+const emptyState = document.getElementById('empty-state');
+const connectBtn = document.getElementById('connect-btn');
+const walletInfo = document.getElementById('wallet-info');
+const walletAddressDisplay = document.getElementById('wallet-address-display');
+const walletBalanceDisplay = document.getElementById('wallet-balance-display');
+const modalOverlay = document.getElementById('modal-overlay');
+const modalClose = document.getElementById('modal-close');
+const modalMediaWrap = document.getElementById('modal-media-wrap');
+const modalTitle = document.getElementById('modal-title');
+const modalDescription = document.getElementById('modal-description');
+const modalMeta = document.getElementById('modal-meta');
+const modalPriceWrap = document.getElementById('modal-price-wrap');
+const modalActions = document.getElementById('modal-actions');
+const fullscreenBtn = document.getElementById('fullscreen-btn');
+const txStatus = document.getElementById('tx-status');
+const filterOwned = document.getElementById('filter-owned');
+
+// ─────────────────────────────────────────────
+// FETCH ALL TOKENS
+// ─────────────────────────────────────────────
+async function fetchAllTokens() {
+  showSkeletons();
+  try {
+    const query = `
+      query($creator: String!) {
+        token(
+          where: { creators: { creator_address: { _eq: $creator } } }
+          order_by: { timestamp: desc }
+          limit: 500
+        ) {
+          token_id
+          name
+          description
+          display_uri
+          artifact_uri
+          mime
+          supply
+          timestamp
+          fa { contract }
+          listings_active(order_by: { price: asc }, limit: 1) { price bigmap_key marketplace_contract seller_address }
+          holders(where: { holder_address: { _eq: $creator }, quantity: { _gt: "0" } }) { quantity }
+        }
+      }
+    `;
+    const res = await fetch(OBJKT_GRAPHQL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, variables: { creator: CREATOR } })
+    });
+    const data = await res.json();
+    if (data.errors) throw new Error(data.errors[0].message);
+    const raw = data.data.token || [];
+    const seen = new Set();
+    allTokens = raw.filter(t => {
+      const key = `${t.fa?.contract}:${t.token_id}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      if (!t.supply || t.supply === 0) return false;
+      return true;
+    });
+    applyFilterAndSort();
+  } catch (e) {
+    console.error(e);
+    grid.innerHTML = '';
+    errorState.classList.add('visible');
+  }
+}
+
+// ─────────────────────────────────────────────
+// APPLY FILTER + SORT
+// ─────────────────────────────────────────────
+function applyFilterAndSort() {
+  let tokens = [...allTokens];
+
+  // Filter
+  if (currentFilter === 'primary') {
+    tokens = tokens.filter(t => t.listings_active?.length > 0 && t.listings_active[0].seller_address === CREATOR);
+  } else if (currentFilter === 'secondary') {
+    tokens = tokens.filter(t => t.listings_active?.length > 0 && t.listings_active[0].seller_address !== CREATOR);
+  } else if (currentFilter === 'owned' && walletPkh) {
+    tokens = tokens.filter(t => {
+      return t.holders && t.holders.some(h => h.quantity > 0);
+    });
+  }
+
+  // Sort
+  if (currentSort === 'newest') {
+    tokens.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  } else if (currentSort === 'oldest') {
+    tokens.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  } else if (currentSort === 'price-asc') {
+    tokens.sort((a, b) => {
+      const pa = a.listings_active?.[0]?.price ?? Infinity;
+      const pb = b.listings_active?.[0]?.price ?? Infinity;
+      return pa - pb;
+    });
+  } else if (currentSort === 'price-desc') {
+    tokens.sort((a, b) => {
+      const pa = a.listings_active?.[0]?.price ?? -1;
+      const pb = b.listings_active?.[0]?.price ?? -1;
+      return pb - pa;
+    });
+  }
+
+  filteredTokens = tokens;
+  displayedCount = 0;
+  grid.innerHTML = '';
+  errorState.classList.remove('visible');
+  emptyState.classList.remove('visible');
+
+  if (filteredTokens.length === 0) {
+    emptyState.classList.add('visible');
+    return;
+  }
+
+  renderNextPage();
+  // Check for deep link on first render
+  if (displayedCount > 0) openTokenFromPath();
+}
+
+// ─────────────────────────────────────────────
+// RENDER NEXT PAGE
+// ─────────────────────────────────────────────
+function renderNextPage() {
+  const slice = filteredTokens.slice(displayedCount, displayedCount + PAGE_SIZE);
+  slice.forEach(token => grid.appendChild(buildCard(token)));
+  displayedCount += slice.length;
+  scrollLoader.classList.remove('visible');
+}
+
+// ─────────────────────────────────────────────
+// BUILD CARD
+// ─────────────────────────────────────────────
+function buildCard(token) {
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  const listed = token.listings_active && token.listings_active.length > 0;
+  const price = listed ? (token.listings_active[0].price / MUTEZ).toFixed(2) : null;
+  const mediaUrl = ipfsToHttp(token.display_uri || token.artifact_uri);
+  const mime = token.mime || '';
+  const isVideo = mime.includes('video') || mediaUrl.match(/\.(mp4|webm|mov|ogv)(\?|$)/i);
+  const editions = token.supply || 0;
+
+  // Media
+  const mediaWrap = document.createElement('div');
+  mediaWrap.className = 'card-media';
+
+  if (isVideo) {
+    const vid = document.createElement('video');
+    vid.src = mediaUrl;
+    vid.autoplay = true;
+    vid.muted = true;
+    vid.loop = true;
+    vid.playsInline = true;
+    vid.setAttribute('playsinline', '');
+    mediaWrap.appendChild(vid);
+  } else {
+    const img = document.createElement('img');
+    img.src = mediaUrl;
+    img.alt = token.name || 'Token';
+    img.loading = 'lazy';
+    mediaWrap.appendChild(img);
+  }
+
+  // Info
+  const info = document.createElement('div');
+  info.className = 'card-info';
+
+  const title = document.createElement('div');
+  title.className = 'card-title';
+  title.textContent = token.name || 'Untitled';
+
+  const meta = document.createElement('div');
+  meta.className = 'card-meta';
+  meta.textContent = `${editions} edition${editions !== 1 ? 's' : ''}`;
+
+  const bottom = document.createElement('div');
+  bottom.className = 'card-bottom';
+
+  if (listed) {
+    const isPrimary = token.listings_active[0].seller_address === CREATOR;
+
+    const priceWrap = document.createElement('div');
+    priceWrap.style.display = 'flex';
+    priceWrap.style.alignItems = 'center';
+    priceWrap.style.gap = '8px';
+
+    const priceEl = document.createElement('span');
+    priceEl.className = 'card-price';
+    priceEl.textContent = `${price} XTZ`;
+
+    const saleTag = document.createElement('span');
+    saleTag.className = isPrimary ? 'tag-primary' : 'tag-secondary';
+    saleTag.textContent = isPrimary ? 'Primary' : 'Secondary';
+
+    priceWrap.appendChild(priceEl);
+    priceWrap.appendChild(saleTag);
+
+    const buyBtn = document.createElement('button');
+    buyBtn.className = 'btn-buy-card';
+    buyBtn.textContent = 'Buy';
+    buyBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      handleBuy(token);
+    });
+
+    bottom.appendChild(priceWrap);
+    bottom.appendChild(buyBtn);
+  } else {
+    const tag = document.createElement('span');
+    tag.className = 'tag-not-listed';
+    tag.textContent = 'Not Listed';
+    bottom.appendChild(tag);
+  }
+
+  info.appendChild(title);
+  info.appendChild(meta);
+  info.appendChild(bottom);
+
+  card.appendChild(mediaWrap);
+  card.appendChild(info);
+
+  card.addEventListener('click', () => openModal(token));
+
+  return card;
+}
+
+// ─────────────────────────────────────────────
+// OPEN MODAL
+// ─────────────────────────────────────────────
+function openModal(token) {
+  currentToken = token;
+  const listed = token.listings_active && token.listings_active.length > 0;
+  const price = listed ? (token.listings_active[0].price / MUTEZ).toFixed(2) : null;
+  const mime = token.mime || '';
+  const artifactUrl = ipfsToHttp(token.artifact_uri || token.display_uri);
+  const isVideo = mime.includes('video') || artifactUrl.match(/\.(mp4|webm|mov|ogv)(\?|$)/i);
+  const editions = token.supply || 0;
+  const objktUrl = `https://objkt.com/tokens/${token.fa?.contract}/${token.token_id}`;
+
+  // Media
+  const fullscreenBtnEl = document.getElementById('fullscreen-btn');
+  // Remove old media
+  Array.from(modalMediaWrap.children).forEach(c => {
+    if (c !== fullscreenBtnEl) c.remove();
+  });
+
+  let mediaEl;
+  if (isVideo) {
+    mediaEl = document.createElement('video');
+    mediaEl.src = artifactUrl;
+    mediaEl.controls = true;
+    mediaEl.autoplay = true;
+    mediaEl.muted = true;
+    mediaEl.loop = true;
+    mediaEl.style.width = '100%';
+    mediaEl.style.height = '100%';
+    mediaEl.style.objectFit = 'contain';
+  } else {
+    mediaEl = document.createElement('img');
+    mediaEl.src = artifactUrl;
+    mediaEl.alt = token.name || 'Token';
+    mediaEl.style.width = '100%';
+    mediaEl.style.height = '100%';
+    mediaEl.style.objectFit = 'contain';
+  }
+
+  modalMediaWrap.insertBefore(mediaEl, fullscreenBtnEl);
+
+  // Title
+  modalTitle.textContent = token.name || 'Untitled';
+
+  // Description
+  modalDescription.textContent = token.description || '';
+
+  // Meta rows
+  modalMeta.innerHTML = '';
+  const ownedQty = walletPkh
+    ? (token.holders?.find(h => h.quantity > 0)?.quantity || 0)
+    : 0;
+
+  const metaRows = [
+    { label: 'Editions', value: editions },
+  ];
+  if (walletPkh && ownedQty > 0) {
+    metaRows.push({ label: 'You own', value: `${ownedQty} edition${ownedQty !== 1 ? 's' : ''}`, owned: true });
+  }
+  metaRows.push({ label: 'Contract', value: shortHash(token.fa?.contract), link: `https://tzkt.io/${token.fa?.contract}` });
+  metaRows.push({ label: 'Token ID', value: token.token_id });
+
+  metaRows.forEach(row => {
+    const div = document.createElement('div');
+    div.className = 'modal-meta-row';
+    const valueHtml = row.link
+      ? `<a class="modal-meta-link" href="${row.link}" target="_blank" rel="noopener">${row.value}</a>`
+      : `<span class="modal-meta-value${row.owned ? ' owned' : ''}">${row.value}</span>`;
+    div.innerHTML = `<span class="modal-meta-label">${row.label}</span>${valueHtml}`;
+    modalMeta.appendChild(div);
+  });
+
+  // Price
+  modalPriceWrap.innerHTML = '';
+  if (listed) {
+    const isPrimary = token.listings_active[0].seller_address === CREATOR;
+    const priceWrap = document.createElement('div');
+    priceWrap.style.display = 'flex';
+    priceWrap.style.alignItems = 'center';
+    priceWrap.style.gap = '10px';
+
+    const p = document.createElement('div');
+    p.className = 'modal-price';
+    p.textContent = `${price} XTZ`;
+
+    const saleTag = document.createElement('span');
+    saleTag.className = isPrimary ? 'tag-primary' : 'tag-secondary';
+    saleTag.textContent = isPrimary ? 'Primary' : 'Secondary';
+
+    priceWrap.appendChild(p);
+    priceWrap.appendChild(saleTag);
+    modalPriceWrap.appendChild(priceWrap);
+  }
+
+  // Actions
+  modalActions.innerHTML = '';
+
+  if (listed) {
+    const buyBtn = document.createElement('button');
+    buyBtn.className = 'btn-primary';
+    buyBtn.textContent = 'Buy';
+    buyBtn.addEventListener('click', () => handleBuy(token));
+    modalActions.appendChild(buyBtn);
+  } else {
+    const tag = document.createElement('div');
+    tag.className = 'modal-tag-not-listed';
+    tag.textContent = 'Not Listed';
+    modalActions.appendChild(tag);
+  }
+
+  const objktLink = document.createElement('a');
+  objktLink.className = 'btn-secondary';
+  objktLink.href = objktUrl;
+  objktLink.target = '_blank';
+  objktLink.rel = 'noopener';
+  objktLink.textContent = 'View on Objkt';
+  modalActions.appendChild(objktLink);
+
+  // Share button row
+  const shareRow = document.createElement('div');
+  shareRow.style.display = 'flex';
+  shareRow.style.justifyContent = 'center';
+
+  const shareBtn = document.createElement('button');
+  shareBtn.className = 'btn-share';
+  shareBtn.id = 'share-btn';
+  shareBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Share`;
+  shareRow.appendChild(shareBtn);
+  modalActions.appendChild(shareRow);
+
+  const shareToast = document.createElement('div');
+  shareToast.className = 'share-toast';
+  shareToast.id = 'share-toast';
+  shareToast.textContent = 'Link copied to clipboard';
+  modalActions.appendChild(shareToast);
+
+  shareBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      shareToast.classList.add('visible');
+      setTimeout(() => shareToast.classList.remove('visible'), 2000);
+    });
+  });
+
+  modalOverlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Update URL to path-based for deep linking and OG previews
+  const path = `/token/${token.fa?.contract}/${token.token_id}`;
+  history.pushState({ token: path }, '', path);
+}
+
+function closeModal() {
+  modalOverlay.classList.remove('open');
+  document.body.style.overflow = '';
+  currentToken = null;
+  // Stop video if playing
+  const vid = modalMediaWrap.querySelector('video');
+  if (vid) vid.pause();
+  // Return to root
+  history.pushState({}, '', '/');
+}
+
+modalClose.addEventListener('click', closeModal);
+modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Handle browser back/forward
+window.addEventListener('popstate', () => {
+  const path = window.location.pathname;
+  if (path === '/' || path === '') {
+    if (modalOverlay.classList.contains('open')) {
+      modalOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+      currentToken = null;
+      const vid = modalMediaWrap.querySelector('video');
+      if (vid) vid.pause();
+    }
+  } else {
+    openTokenFromPath();
+  }
+});
+
+// Open token from URL path on load
+function openTokenFromPath() {
+  // Check path /token/CONTRACT/TOKENID
+  const parts = window.location.pathname.split('/').filter(Boolean);
+  if (parts[0] === 'token' && parts.length >= 3) {
+    const contract = parts[1];
+    const tokenId = parts[2];
+    const token = allTokens.find(t => t.fa?.contract === contract && String(t.token_id) === String(tokenId));
+    if (token) { openModal(token); return; }
+  }
+  // Check ?token=CONTRACT/TOKENID (redirect from edge function)
+  const params = new URLSearchParams(window.location.search);
+  const tokenParam = params.get('token');
+  if (tokenParam) {
+    const [contract, tokenId] = tokenParam.split('/');
+    const token = allTokens.find(t => t.fa?.contract === contract && String(t.token_id) === String(tokenId));
+    if (token) openModal(token);
+  }
+}
+  if (token) openModal(token);
+}
+
+// ─────────────────────────────────────────────
+// FULLSCREEN
+// ─────────────────────────────────────────────
+fullscreenBtn.addEventListener('click', () => {
+  const el = modalMediaWrap.querySelector('img, video');
+  if (!el) return;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
+  if (req) req.call(el);
+});
+
+// ─────────────────────────────────────────────
+// WALLET CONNECT
+// ─────────────────────────────────────────────
+async function initBeacon() {
+  try {
+    if (!window.beacon?.DAppClient) {
+      console.warn('Beacon SDK not available');
+      return;
+    }
+    beaconClient = new window.beacon.DAppClient({
+      name: '328 Photography Shop',
+      network: { type: 'mainnet' }
+    });
+
+    // Check if already connected
+    try {
+      const activeAccount = await beaconClient.getActiveAccount();
+      if (activeAccount) {
+        walletPkh = activeAccount.address;
+        await onWalletConnected(walletPkh);
+      }
+    } catch (e) { /* not connected */ }
+  } catch (e) {
+    console.warn('Beacon SDK failed to load:', e);
+  }
+}
+
+connectBtn.addEventListener('click', async () => {
+  if (walletPkh) {
+    // Disconnect
+    await beaconClient?.clearActiveAccount();
+    walletPkh = null;
+    walletAddress = null;
+    connectBtn.textContent = 'Connect Wallet';
+    connectBtn.classList.remove('connected');
+    walletInfo.classList.remove('visible');
+    filterOwned.style.display = 'none';
+    if (currentFilter === 'owned') {
+      currentFilter = 'all';
+      document.querySelectorAll('#filter-group .pill').forEach(p => {
+        p.classList.toggle('active', p.dataset.filter === 'all');
+      });
+      applyFilterAndSort();
+    }
+    // Refresh to remove owned data
+    fetchAllTokensWithWallet();
+    return;
+  }
+
+  try {
+    connectBtn.textContent = 'Connecting…';
+    const permissions = await beaconClient.requestPermissions();
+    walletPkh = permissions.address;
+    await onWalletConnected(walletPkh);
+  } catch (e) {
+    console.error(e);
+    connectBtn.textContent = 'Connect Wallet';
+  }
+});
+
+async function onWalletConnected(pkh) {
+  walletPkh = pkh;
+  walletAddressDisplay.textContent = truncateAddress(pkh);
+  connectBtn.textContent = 'Disconnect';
+  connectBtn.classList.add('connected');
+  walletInfo.classList.add('visible');
+  filterOwned.style.display = 'inline-flex';
+
+  // Fetch tez balance
+  try {
+    const res = await fetch(`https://mainnet.smartpy.io/chains/main/blocks/head/context/contracts/${pkh}/balance`);
+    const mutez = await res.json();
+    const tez = (parseInt(mutez) / MUTEZ).toFixed(2);
+    walletBalanceDisplay.textContent = `${tez} XTZ`;
+  } catch (e) {
+    walletBalanceDisplay.textContent = '';
+  }
+
+  // Re-fetch tokens so owned data reflects connected wallet
+  await fetchAllTokensWithWallet();
+}
+
+async function fetchAllTokensWithWallet() {
+  try {
+    const query = `
+      query($creator: String!, $wallet: String!) {
+        token(
+          where: { creators: { creator_address: { _eq: $creator } } }
+          order_by: { timestamp: desc }
+          limit: 500
+        ) {
+          token_id
+          name
+          description
+          display_uri
+          artifact_uri
+          mime
+          supply
+          timestamp
+          fa { contract }
+          listings_active(order_by: { price: asc }, limit: 1) { price bigmap_key marketplace_contract seller_address }
+          holders(where: { holder_address: { _eq: $wallet }, quantity: { _gt: "0" } }) { quantity }
+        }
+      }
+    `;
+    const res = await fetch(OBJKT_GRAPHQL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query,
+        variables: { creator: CREATOR, wallet: walletPkh || CREATOR }
+      })
+    });
+    const data = await res.json();
+    if (data.errors) throw new Error(data.errors[0].message);
+    const raw = data.data.token || [];
+    const seen = new Set();
+    allTokens = raw.filter(t => {
+      const key = `${t.fa?.contract}:${t.token_id}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      if (!t.supply || t.supply === 0) return false;
+      return true;
+    });
+    applyFilterAndSort();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+// ─────────────────────────────────────────────
+// BUY
+// ─────────────────────────────────────────────
+async function handleBuy(token) {
+  if (!walletPkh) {
+    connectBtn.click();
+    return;
+  }
+
+  const listing = token.listings_active?.[0];
+  if (!listing) return;
+
+  showTxStatus('Waiting for wallet confirmation…', '');
+
+  try {
+    const contractAddress = listing.marketplace_contract || 'KT1WvzYHCNBvDSdwafTHv7nJ1dWmZ8GCYuuC';
+    const bigmapKey = listing.bigmap_key;
+    const price = listing.price;
+
+    showTxStatus('Submitting transaction…', '');
+
+    // Build Micheline parameters for fulfill_ask
+    // Contract expects: pair(nat, nat, option(address), option(bytes), map(address, nat))
+    // - arg1: listing bigmap key (nat)
+    // - arg2: token amount to buy (nat) - always 1 for single edition
+    // - arg3: optional referrer address (None)
+    // - arg4: optional bytes (None)  
+    // - arg5: map of royalty overrides (empty)
+    const response = await beaconClient.requestOperation({
+      operationDetails: [
+        {
+          kind: 'transaction',
+          destination: contractAddress,
+          amount: String(price),
+          parameters: {
+            entrypoint: 'fulfill_ask',
+            value: {
+              prim: 'Pair',
+              args: [
+                { int: String(bigmapKey) },
+                { int: '1' },
+                { prim: 'None' },
+                { prim: 'None' },
+                []
+              ]
+            }
+          }
+        }
+      ]
+    });
+
+    console.log('Transaction hash:', response.transactionHash);
+    showTxStatus('Purchase confirmed! Thank you.', 'success');
+    setTimeout(() => hideTxStatus(), 6000);
+    setTimeout(() => fetchAllTokensWithWallet(), 3000);
+
+  } catch (e) {
+    console.error('Buy error:', e);
+    if (
+      e.message?.includes('cancel') ||
+      e.message?.includes('aborted') ||
+      e.message?.includes('dismiss') ||
+      e.title?.includes('Aborted') ||
+      e.description?.includes('aborted')
+    ) {
+      hideTxStatus();
+    } else {
+      showTxStatus('Transaction failed. Please try again.', 'error');
+      setTimeout(() => hideTxStatus(), 5000);
+    }
+  }
+}
+
+function showTxStatus(msg, type) {
+  txStatus.textContent = msg;
+  txStatus.className = 'visible';
+  if (type) txStatus.classList.add(type);
+}
+
+function hideTxStatus() {
+  txStatus.className = '';
+}
+
+// ─────────────────────────────────────────────
+// SKELETONS
+// ─────────────────────────────────────────────
+function showSkeletons() {
+  grid.innerHTML = '';
+  for (let i = 0; i < 8; i++) {
+    const sk = document.createElement('div');
+    sk.className = 'skeleton-card';
+    sk.innerHTML = `
+      <div class="skeleton-img"></div>
+      <div class="skeleton-text"></div>
+      <div class="skeleton-text short"></div>
+    `;
+    grid.appendChild(sk);
+  }
+}
+
+// ─────────────────────────────────────────────
+// INFINITE SCROLL
+// ─────────────────────────────────────────────
+const sentinel = document.createElement('div');
+sentinel.id = 'sentinel';
+document.querySelector('footer').before(sentinel);
+
+const observer = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting && displayedCount < filteredTokens.length && !isLoading) {
+    isLoading = true;
+    scrollLoader.classList.add('visible');
+    setTimeout(() => {
+      renderNextPage();
+      isLoading = false;
+    }, 300);
+  }
+}, { rootMargin: '200px' });
+
+observer.observe(sentinel);
+
+// ─────────────────────────────────────────────
+// SORT + FILTER CONTROLS
+// ─────────────────────────────────────────────
+document.getElementById('sort-group').addEventListener('click', e => {
+  const pill = e.target.closest('.pill');
+  if (!pill) return;
+  currentSort = pill.dataset.sort;
+  document.querySelectorAll('#sort-group .pill').forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+  applyFilterAndSort();
+});
+
+document.getElementById('filter-group').addEventListener('click', e => {
+  const pill = e.target.closest('.pill');
+  if (!pill) return;
+  currentFilter = pill.dataset.filter;
+  document.querySelectorAll('#filter-group .pill').forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+  applyFilterAndSort();
+});
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+function ipfsToHttp(uri) {
+  if (!uri) return '';
+  if (uri.startsWith('ipfs://')) return 'https://ipfs.io/ipfs/' + uri.slice(7);
+  return uri;
+}
+
+function truncateAddress(addr) {
+  if (!addr) return '';
+  return addr.slice(0, 6) + '…' + addr.slice(-4);
+}
+
+function shortHash(hash) {
+  if (!hash) return '—';
+  return hash.slice(0, 8) + '…' + hash.slice(-4);
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+async function init() {
+  await initBeacon();
+  if (!walletPkh) {
+    await fetchAllTokens();
+  }
+}
+
+// Wait for SDKs to load
+window.addEventListener('load', () => {
+  setTimeout(init, 500);
+});
+</script>
+</body>
+</html>

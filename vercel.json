@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/token/:contract/:tokenId",
+      "destination": "/api/token?contract=:contract&tokenId=:tokenId"
+    }
+  ]
+}
