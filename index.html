@@ -1355,14 +1355,24 @@ fullscreenBtn.addEventListener('click', () => {
   const el = modalMediaWrap.querySelector('img, video');
   if (!el) return;
 
-  // Switch to full resolution artifact before going fullscreen
   const artifactUrl = fullscreenBtn.dataset.artifactUrl;
-  if (artifactUrl && el.src !== artifactUrl) {
-    el.src = artifactUrl;
-  }
-
   const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
-  if (req) req.call(el);
+
+  if (artifactUrl && el.tagName === 'IMG' && el.src !== artifactUrl) {
+    // Load full res first, then go fullscreen once loaded
+    const fullResImg = new Image();
+    fullResImg.onload = () => {
+      el.src = artifactUrl;
+      if (req) req.call(el);
+    };
+    fullResImg.onerror = () => {
+      // If full res fails, just go fullscreen with what we have
+      if (req) req.call(el);
+    };
+    fullResImg.src = artifactUrl;
+  } else {
+    if (req) req.call(el);
+  }
 });
 
 // ─────────────────────────────────────────────
