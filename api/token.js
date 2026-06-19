@@ -11,7 +11,7 @@ export default async function handler(req) {
 
   let tokenName = '328 Photography';
   let tokenDescription = 'NFT Shop — 328photography.xyz';
-  let tokenImage = 'https://ipfs.io/ipfs/QmDefault';
+  let tokenImage = 'https://328photography.xyz/wp-content/uploads/2024/01/logo.png';
 
   try {
     const query = `
@@ -23,6 +23,7 @@ export default async function handler(req) {
           name
           description
           display_uri
+          thumbnail_uri
         }
       }
     `;
@@ -41,12 +42,13 @@ export default async function handler(req) {
       tokenDescription = token.description
         ? token.description.slice(0, 200)
         : '328 Photography — NFT Shop';
-      if (token.display_uri) {
-        const uri = token.display_uri;
-        // Use Cloudflare IPFS gateway which is faster and more reliable for crawlers
-        tokenImage = uri.startsWith('ipfs://')
-          ? `https://cloudflare-ipfs.com/ipfs/${uri.slice(7)}`
-          : uri;
+
+      // Try thumbnail_uri first (smaller, faster), then display_uri
+      const imageUri = token.thumbnail_uri || token.display_uri;
+      if (imageUri) {
+        tokenImage = imageUri.startsWith('ipfs://')
+          ? `https://dweb.link/ipfs/${imageUri.slice(7)}`
+          : imageUri;
       }
     }
   } catch (e) {
@@ -56,7 +58,6 @@ export default async function handler(req) {
   const shopUrl = `https://shop.328photography.xyz/token/${contract}/${tokenId}`;
   const redirectUrl = `https://shop.328photography.xyz/?token=${contract}/${tokenId}`;
 
-  // Escape for HTML attributes
   const safeName = tokenName.replace(/"/g, '&quot;').replace(/</g, '&lt;');
   const safeDesc = tokenDescription.replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
