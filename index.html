@@ -671,6 +671,72 @@
 
     .share-toast.visible { height: 18px; opacity: 1; }
 
+    /* ── iOS WALLET MODAL ── */
+    #ios-wallet-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: rgba(0,0,0,0.88);
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0;
+    }
+
+    #ios-wallet-modal.open { display: flex; }
+
+    .ios-wallet-sheet {
+      background: var(--surface);
+      border-radius: 12px 12px 0 0;
+      width: 100%;
+      max-width: 480px;
+      padding: 24px 24px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .ios-wallet-title {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .ios-wallet-btn {
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      border: none;
+      border-radius: var(--radius-btn);
+      padding: 14px 24px;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      letter-spacing: 0.03em;
+    }
+
+    .ios-wallet-cancel {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-btn);
+      padding: 12px 24px;
+      font-family: var(--font);
+      font-size: 13px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .ios-wallet-hint {
+      font-size: 11px;
+      color: var(--text-faint);
+      text-align: center;
+      line-height: 1.5;
+    }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 1100px) {
       .grid { grid-template-columns: repeat(2, 1fr); }
@@ -786,6 +852,16 @@
 
 <!-- TX STATUS TOAST -->
 <div id="tx-status"></div>
+
+<!-- iOS WALLET MODAL -->
+<div id="ios-wallet-modal">
+  <div class="ios-wallet-sheet">
+    <p class="ios-wallet-title">Connect Wallet</p>
+    <button class="ios-wallet-btn" id="ios-temple-btn">Open Temple Wallet</button>
+    <p class="ios-wallet-hint">Temple will open and ask you to approve the connection. Return here once connected.</p>
+    <button class="ios-wallet-cancel" id="ios-cancel-btn">Cancel</button>
+  </div>
+</div>
 
 <script>
 // ─────────────────────────────────────────────
@@ -1269,10 +1345,27 @@ async function initBeacon() {
       console.warn('Beacon SDK not available');
       return;
     }
+
+    // Detect mobile
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
     beaconClient = new window.beacon.DAppClient({
       name: '328 Photography Shop',
-      network: { type: 'mainnet' }
+      network: { type: 'mainnet' },
+      featuredWallets: ['temple', 'kukai', 'umami'],
+      walletConnectOptions: {
+        projectId: '328photography',
+        relayUrl: 'wss://relay.walletconnect.com'
+      },
+      // On iOS show the wallet picker with WalletConnect + deep link options
+      preferredNetwork: window.beacon.NetworkType?.MAINNET || 'mainnet',
+      disclaimerText: 'Connect your Tezos wallet to browse and purchase NFTs.'
     });
+
+    // Store mobile flags for use in connect flow
+    beaconClient._isMobile = isMobile;
+    beaconClient._isIOS = isIOS;
 
     // Check if already connected
     try {
@@ -1311,12 +1404,68 @@ connectBtn.addEventListener('click', async () => {
 
   try {
     connectBtn.textContent = 'Connecting…';
+
+    // On iOS Safari show our custom modal with Temple deep link
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isIOS) {
+      connectBtn.textContent = 'Connect Wallet';
+      document.getElementById('ios-wallet-modal').classList.add('open');
+      return;
+    }
+
     const permissions = await beaconClient.requestPermissions();
     walletPkh = permissions.address;
     await onWalletConnected(walletPkh);
   } catch (e) {
     console.error(e);
     connectBtn.textContent = 'Connect Wallet';
+  }
+});
+
+// ─────────────────────────────────────────────
+// iOS WALLET MODAL
+// ─────────────────────────────────────────────
+document.getElementById('ios-temple-btn').addEventListener('click', async () => {
+  document.getElementById('ios-wallet-modal').classList.remove('open');
+
+  try {
+    // Request permissions — this generates a pairing URI
+    connectBtn.textContent = 'Connecting…';
+
+    // Use Beacon to get the pairing payload, then open Temple via universal link
+    const pairingRequest = await beaconClient.getPairingRequestInfo?.();
+
+    if (pairingRequest?.uri) {
+      // Temple universal link with the pairing URI
+      const templeLink = `https://temple.finance/dapp?uri=${encodeURIComponent(pairingRequest.uri)}`;
+      window.location.href = templeLink;
+    } else {
+      // Fallback — just request permissions which may trigger Temple on some setups
+      const permissions = await beaconClient.requestPermissions();
+      walletPkh = permissions.address;
+      await onWalletConnected(walletPkh);
+    }
+  } catch (e) {
+    console.error('iOS connect error:', e);
+    connectBtn.textContent = 'Connect Wallet';
+  }
+});
+
+document.getElementById('ios-cancel-btn').addEventListener('click', () => {
+  document.getElementById('ios-wallet-modal').classList.remove('open');
+  connectBtn.textContent = 'Connect Wallet';
+});
+
+// Check for wallet connection on page focus (user returns from Temple app)
+document.addEventListener('visibilitychange', async () => {
+  if (!document.hidden && !walletPkh && beaconClient) {
+    try {
+      const activeAccount = await beaconClient.getActiveAccount();
+      if (activeAccount) {
+        walletPkh = activeAccount.address;
+        await onWalletConnected(walletPkh);
+      }
+    } catch (e) { /* not connected yet */ }
   }
 });
 
@@ -1567,4 +1716,3 @@ window.addEventListener('load', () => {
 </script>
 </body>
 </html>
-
