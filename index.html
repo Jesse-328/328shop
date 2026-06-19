@@ -523,7 +523,7 @@
       position: fixed;
       inset: 0;
       z-index: 600;
-      background: rgba(0,0,0,0.96);
+      background: #0a0a0a;
       align-items: center;
       justify-content: center;
       padding: 0;
@@ -634,13 +634,19 @@
       max-width: 900px;
       padding: 20px 0 0;
       display: flex;
-      flex-direction: column;
-      gap: 16px;
-      overflow-y: auto;
-      max-height: 40vh;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 40px;
+      overflow: visible;
     }
 
-    .modal-info-left { flex: 1; min-width: 0; }
+    .modal-info-left {
+      flex: 1;
+      min-width: 0;
+      overflow-y: auto;
+      max-height: 36vh;
+      padding-right: 16px;
+    }
 
     .modal-title {
       font-family: var(--font-serif);
@@ -696,32 +702,39 @@
     .modal-meta-link:hover { opacity: 0.8; }
 
     .modal-price-actions {
+      flex-shrink: 0;
       display: flex;
-      align-items: center;
-      gap: 20px;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 180px;
     }
 
     .modal-price {
-      font-size: 18px;
+      font-size: 22px;
       font-weight: 400;
       color: var(--text-bright);
     }
 
     .modal-actions {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
+      width: 100%;
     }
 
     .modal-actions .btn-primary,
-    .modal-actions .btn-secondary { width: auto; padding: 8px 24px; }
+    .modal-actions .btn-secondary {
+      width: 100%;
+      padding: 12px 24px;
+      font-size: 12px;
+      text-align: center;
+      white-space: nowrap;
+    }
 
     .modal-actions .btn-share {
-      width: auto;
-      padding: 8px 20px;
+      width: 100%;
+      justify-content: center;
+      padding: 10px 20px;
     }
 
     /* Primary buy button */
@@ -985,13 +998,14 @@
       header { padding: 0 16px; }
       main { padding: 24px 16px 60px; }
       .grid { grid-template-columns: 1fr; gap: 16px; }
-      .modal { padding: 60px 16px 16px; }
-      .modal-right { max-height: none; }
-      .modal-price-actions { flex-direction: column; gap: 12px; width: 100%; }
-      .modal-actions { width: 100%; }
+      .modal { padding: 60px 16px 16px; justify-content: flex-start; overflow-y: auto; }
+      .modal-left { flex: none; min-height: 240px; max-height: 45vh; }
+      .modal-right { flex-direction: column; gap: 16px; overflow: visible; }
+      .modal-info-left { max-height: none; overflow-y: visible; padding-right: 0; }
+      .modal-price-actions { min-width: unset; width: 100%; }
       .modal-actions .btn-primary,
-      .modal-actions .btn-secondary { flex: 1; text-align: center; }
-      .modal-actions .btn-share { width: 100%; justify-content: center; }
+      .modal-actions .btn-secondary,
+      .modal-actions .btn-share { width: 100%; white-space: nowrap; }
       .modal-close { top: 10px; right: 10px; }
       .wallet-info { display: none !important; }
       .btn-back span { display: none; }
