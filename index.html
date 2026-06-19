@@ -857,8 +857,8 @@
 <div id="ios-wallet-modal">
   <div class="ios-wallet-sheet">
     <p class="ios-wallet-title">Connect Wallet</p>
-    <button class="ios-wallet-btn" id="ios-temple-btn">Open Temple Wallet</button>
-    <p class="ios-wallet-hint">Temple will open and ask you to approve the connection. Return here once connected.</p>
+    <button class="ios-wallet-btn" id="ios-temple-btn">Open Wallet App</button>
+    <p class="ios-wallet-hint">Your Tezos wallet app will open and ask you to approve the connection. Return here once connected.</p>
     <button class="ios-wallet-cancel" id="ios-cancel-btn">Cancel</button>
   </div>
 </div>
@@ -1438,21 +1438,24 @@ connectBtn.addEventListener('click', async () => {
 // ─────────────────────────────────────────────
 document.getElementById('ios-temple-btn').addEventListener('click', async () => {
   document.getElementById('ios-wallet-modal').classList.remove('open');
+  connectBtn.textContent = 'Connecting…';
 
   try {
-    // Request permissions — this generates a pairing URI
-    connectBtn.textContent = 'Connecting…';
+    // Subscribe to account changes before requesting
+    beaconClient.subscribeToEvent('ACTIVE_ACCOUNT_SET', async (account) => {
+      if (account && !walletPkh) {
+        walletPkh = account.address;
+        await onWalletConnected(walletPkh);
+      }
+    });
 
-    // Use Beacon to get the pairing payload, then open Temple via universal link
-    const pairingRequest = await beaconClient.getPairingRequestInfo?.();
+    // requestPermissions on iOS will trigger Beacon's built-in flow
+    // which includes a pairing URI that can open wallet apps
+    const permissions = await beaconClient.requestPermissions({
+      network: { type: 'mainnet' }
+    });
 
-    if (pairingRequest?.uri) {
-      // Temple universal link with the pairing URI
-      const templeLink = `https://temple.finance/dapp?uri=${encodeURIComponent(pairingRequest.uri)}`;
-      window.location.href = templeLink;
-    } else {
-      // Fallback — just request permissions which may trigger Temple on some setups
-      const permissions = await beaconClient.requestPermissions();
+    if (permissions?.address) {
       walletPkh = permissions.address;
       await onWalletConnected(walletPkh);
     }
