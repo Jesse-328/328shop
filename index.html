@@ -348,15 +348,6 @@
       flex-wrap: nowrap;
     }
 
-    /* Price + tag wrapper — takes available space, shrinks before BUY button */
-    .card-price-wrap {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-    }
 
     .card-price {
       font-size: 13px;
@@ -1287,28 +1278,30 @@ function buildCard(token) {
 
   const info   = document.createElement('div'); info.className = 'card-info';
   const title  = document.createElement('div'); title.className = 'card-title'; title.textContent = token.name || 'Untitled';
-  const meta   = document.createElement('div'); meta.className  = 'card-meta';  meta.textContent  = `${editions} edition${editions !== 1 ? 's' : ''}`;
   const bottom = document.createElement('div'); bottom.className = 'card-bottom';
 
   if (listed) {
     const isPrimary = token.listings_active[0].seller_address === CREATOR;
     const isSeller  = walletPkh && token.listings_active[0].seller_address === walletPkh;
 
-    // Price wrap uses CSS class — flex:1 ensures it takes space, BUY stays right
-    const priceWrap = document.createElement('div');
-    priceWrap.className = 'card-price-wrap';
-
-    const priceEl = document.createElement('span');
-    priceEl.className = 'card-price';
-    priceEl.textContent = `${price} XTZ`;
-
+    // Editions + sale tag on one line
+    const metaRow = document.createElement('div');
+    metaRow.className = 'card-meta-row';
+    const editionsEl = document.createElement('span');
+    editionsEl.className = 'card-meta';
+    editionsEl.textContent = `${editions} edition${editions !== 1 ? 's' : ''}`;
     const saleTag = document.createElement('span');
     saleTag.className = isPrimary ? 'tag-primary' : 'tag-secondary';
     saleTag.textContent = isPrimary ? 'Primary' : 'Secondary';
+    metaRow.appendChild(editionsEl);
+    metaRow.appendChild(saleTag);
+    bottom.appendChild(metaRow);
 
-    priceWrap.appendChild(priceEl);
-    priceWrap.appendChild(saleTag);
-    bottom.appendChild(priceWrap);
+    // Price on its own line
+    const priceEl = document.createElement('div');
+    priceEl.className = 'card-price';
+    priceEl.textContent = `${price} XTZ`;
+    bottom.appendChild(priceEl);
 
     if (!isSeller) {
       const buyBtn = document.createElement('button');
@@ -1318,13 +1311,21 @@ function buildCard(token) {
       bottom.appendChild(buyBtn);
     }
   } else {
+    // Not listed — editions + tag
+    const metaRow = document.createElement('div');
+    metaRow.className = 'card-meta-row';
+    const editionsEl = document.createElement('span');
+    editionsEl.className = 'card-meta';
+    editionsEl.textContent = `${editions} edition${editions !== 1 ? 's' : ''}`;
     const tag = document.createElement('span');
     tag.className = 'tag-not-listed';
     tag.textContent = 'Not Listed';
-    bottom.appendChild(tag);
+    metaRow.appendChild(editionsEl);
+    metaRow.appendChild(tag);
+    bottom.appendChild(metaRow);
   }
 
-  info.appendChild(title); info.appendChild(meta); info.appendChild(bottom);
+  info.appendChild(title); info.appendChild(bottom);
   card.appendChild(mediaWrap); card.appendChild(info);
   card.addEventListener('click', () => openModal(token));
   return card;
