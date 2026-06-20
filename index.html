@@ -47,7 +47,6 @@
       position: relative;
     }
 
-    /* Film grain */
     body::before {
       content: '';
       position: fixed;
@@ -59,7 +58,6 @@
       background-size: 128px 128px;
     }
 
-    /* ── HEADER ── */
     header {
       position: sticky;
       top: 0;
@@ -88,11 +86,7 @@
     .site-title-num { font-weight: 200; }
     .site-title-word { font-weight: 500; letter-spacing: 0.22em; }
 
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
+    .header-right { display: flex; align-items: center; gap: 16px; }
 
     .btn-back {
       font-size: 11px;
@@ -108,17 +102,10 @@
       white-space: nowrap;
     }
 
-    .btn-back::before {
-      content: '←';
-      color: var(--gold);
-      font-size: 12px;
-      transition: transform var(--ease);
-    }
-
+    .btn-back::before { content: '←'; color: var(--gold); font-size: 12px; transition: transform var(--ease); }
     .btn-back:hover { color: var(--text-bright); }
     .btn-back:hover::before { transform: translateX(-3px); }
 
-    /* Connect Wallet */
     #connect-btn {
       background: transparent;
       color: var(--text-muted);
@@ -146,18 +133,8 @@
       animation: shimmer 3s infinite;
     }
 
-    #connect-btn:hover {
-      color: var(--gold);
-      border-color: var(--gold);
-      box-shadow: 0 0 12px var(--gold-glow);
-    }
-
-    #connect-btn.connected {
-      background: var(--surface);
-      color: var(--text-muted);
-      border-color: var(--border);
-    }
-
+    #connect-btn:hover { color: var(--gold); border-color: var(--gold); box-shadow: 0 0 12px var(--gold-glow); }
+    #connect-btn.connected { background: var(--surface); color: var(--text-muted); border-color: var(--border); }
     #connect-btn.connected::after { animation: none; }
 
     @keyframes shimmer {
@@ -166,60 +143,17 @@
       100% { left: 150%; }
     }
 
-    /* Wallet info */
     .wallet-area { display: flex; align-items: center; gap: 16px; }
-
-    .wallet-info {
-      display: none;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 1px;
-    }
-
+    .wallet-info { display: none; flex-direction: column; align-items: flex-end; gap: 1px; }
     .wallet-info.visible { display: flex; }
+    .wallet-address { font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; }
+    .wallet-balance { font-size: 12px; color: var(--text-bright); }
 
-    .wallet-address {
-      font-size: 11px;
-      color: var(--text-muted);
-      letter-spacing: 0.04em;
-    }
+    main { max-width: 1400px; margin: 0 auto; padding: 40px 28px 80px; }
 
-    .wallet-balance {
-      font-size: 12px;
-      color: var(--text-bright);
-    }
-
-    /* ── MAIN ── */
-    main {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 40px 28px 80px;
-    }
-
-    /* ── CONTROLS ── */
-    .controls {
-      margin-bottom: 36px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .control-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .control-label {
-      font-size: 10px;
-      color: var(--text-faint);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      width: 36px;
-      flex-shrink: 0;
-    }
-
+    .controls { margin-bottom: 36px; display: flex; flex-direction: column; gap: 10px; }
+    .control-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .control-label { font-size: 10px; color: var(--text-faint); letter-spacing: 0.12em; text-transform: uppercase; width: 36px; flex-shrink: 0; }
     .pill-group { display: flex; gap: 6px; flex-wrap: wrap; }
 
     .pill {
@@ -237,34 +171,13 @@
     }
 
     .pill:hover { border-color: var(--text-faint); color: var(--text-bright); }
-
-    .pill.active {
-      background: transparent;
-      color: var(--gold);
-      border-color: var(--gold);
-      font-weight: 500;
-    }
-
+    .pill.active { background: transparent; color: var(--gold); border-color: var(--gold); font-weight: 500; }
     #filter-owned { display: none; }
 
-    /* ── HINT ── */
-    .enlarge-hint {
-      font-size: 10px;
-      color: var(--text-faint);
-      letter-spacing: 0.1em;
-      text-align: center;
-      text-transform: uppercase;
-      margin-bottom: 28px;
-    }
+    .enlarge-hint { font-size: 10px; color: var(--text-faint); letter-spacing: 0.1em; text-align: center; text-transform: uppercase; margin-bottom: 28px; }
 
-    /* ── GRID ── */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
-    }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 
-    /* ── CARD ── */
     .card {
       background: var(--bg-card);
       border-radius: var(--radius-card);
@@ -272,7 +185,6 @@
       cursor: pointer;
       display: flex;
       flex-direction: column;
-      /* Scroll reveal */
       opacity: 0;
       transform: translateY(12px);
       transition: opacity 0.5s ease, transform 0.5s ease, box-shadow var(--ease);
@@ -280,719 +192,186 @@
 
     .card.visible { opacity: 1; transform: translateY(0); }
 
-    .card-media {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      overflow: hidden;
-      background: var(--surface);
-    }
+    .card-media { position: relative; width: 100%; aspect-ratio: 1 / 1; overflow: hidden; background: var(--surface); }
 
-    .card-media img,
-    .card-media video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
+    .card-media img, .card-media video {
+      width: 100%; height: 100%; object-fit: cover; display: block;
       filter: blur(10px);
       transition: filter 0.6s ease, transform 0.4s ease;
     }
 
-    .card-media img.loaded,
-    .card-media video.loaded { filter: blur(0); }
+    .card-media img.loaded, .card-media video.loaded { filter: blur(0); }
+    .card:hover .card-media img, .card:hover .card-media video { transform: scale(1.03); }
 
-    .card:hover .card-media img,
-    .card:hover .card-media video { transform: scale(1.03); }
-
-    /* Subtle depth edge */
     .card-media::after {
-      content: '';
-      position: absolute;
-      inset: 0;
+      content: ''; position: absolute; inset: 0;
       box-shadow: inset 0 0 16px rgba(0,0,0,0.35);
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity var(--ease);
+      pointer-events: none; opacity: 0; transition: opacity var(--ease);
     }
 
     .card:hover .card-media::after { opacity: 1; }
 
     .card-info {
       padding: 12px 14px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      flex: 1;
-      /* Subtle depth below image */
+      display: flex; flex-direction: column; gap: 4px; flex: 1;
       background: linear-gradient(180deg, #0d0d0d 0%, var(--bg-card) 100%);
     }
 
-    .card-title {
-      font-size: 13px;
-      font-weight: 400;
-      color: var(--text-bright);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    .card-title { font-size: 13px; font-weight: 400; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-meta { font-size: 11px; color: var(--text-faint); }
 
-    .card-meta {
-      font-size: 11px;
-      color: var(--text-faint);
-    }
-
+    /* ── FIX 1: allow card-bottom to wrap on narrow cards ── */
     .card-bottom {
       margin-top: 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .card-price {
       font-size: 13px;
       color: var(--text-bright);
       font-weight: 400;
+      white-space: nowrap;
     }
 
-    /* Tags */
-    .tag-not-listed {
-      font-size: 10px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-faint);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-btn);
-      padding: 3px 10px;
-    }
+    .tag-not-listed { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 3px 10px; }
 
     .tag-primary {
-      font-size: 10px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--gold);
-      border: 1px solid var(--gold-dim);
-      border-radius: var(--radius-btn);
-      padding: 3px 10px;
-      position: relative;
-      overflow: hidden;
+      font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--gold); border: 1px solid var(--gold-dim); border-radius: var(--radius-btn); padding: 3px 10px;
+      position: relative; overflow: hidden;
     }
 
     .tag-primary::after {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%;
-      width: 60%; height: 100%;
+      content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
       background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
       animation: shimmer 2.5s infinite;
     }
 
-    .tag-secondary {
-      font-size: 10px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-btn);
-      padding: 3px 10px;
-    }
+    .tag-secondary { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 3px 10px; }
 
-    /* Buy button */
     .btn-buy-card {
-      background: transparent;
-      color: var(--gold);
-      border: 1px solid var(--gold-dim);
-      border-radius: var(--radius-btn);
-      padding: 6px 14px;
-      font-family: var(--font-sans);
-      font-size: 11px;
-      font-weight: 400;
-      cursor: pointer;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      transition: all var(--ease);
-      position: relative;
-      overflow: hidden;
-      white-space: nowrap;
+      background: transparent; color: var(--gold); border: 1px solid var(--gold-dim);
+      border-radius: var(--radius-btn); padding: 6px 14px;
+      font-family: var(--font-sans); font-size: 11px; font-weight: 400;
+      cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase;
+      transition: all var(--ease); position: relative; overflow: hidden; white-space: nowrap;
     }
 
     .btn-buy-card::after {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%;
-      width: 60%; height: 100%;
+      content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
       background: linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent);
       animation: shimmer 2.5s infinite;
     }
 
-    .btn-buy-card:hover {
-      color: var(--gold);
-      border-color: var(--gold);
-      box-shadow: 0 0 10px var(--gold-glow);
-    }
+    .btn-buy-card:hover { color: var(--gold); border-color: var(--gold); box-shadow: 0 0 10px var(--gold-glow); }
 
-    /* ── SKELETON ── */
-    .skeleton-card {
-      background: var(--surface);
-      border-radius: var(--radius-card);
-      overflow: hidden;
-    }
-
-    .skeleton-img {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      background: var(--surface2);
-      animation: sk-pulse 1.8s ease infinite;
-    }
-
-    .skeleton-text {
-      margin: 12px 14px;
-      height: 12px;
-      border-radius: 2px;
-      background: var(--surface2);
-      animation: sk-pulse 1.8s ease infinite;
-    }
-
+    .skeleton-card { background: var(--surface); border-radius: var(--radius-card); overflow: hidden; }
+    .skeleton-img { width: 100%; aspect-ratio: 1 / 1; background: var(--surface2); animation: sk-pulse 1.8s ease infinite; }
+    .skeleton-text { margin: 12px 14px; height: 12px; border-radius: 2px; background: var(--surface2); animation: sk-pulse 1.8s ease infinite; }
     .skeleton-text.short { width: 50%; margin-top: 6px; }
 
-    @keyframes sk-pulse {
-      0%, 100% { opacity: 0.3; }
-      50%       { opacity: 0.6; }
-    }
+    @keyframes sk-pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.6; } }
 
-    /* ── SCROLL LOADER ── */
-    #scroll-loader {
-      display: none;
-      justify-content: center;
-      padding: 40px 0 0;
-    }
-
+    #scroll-loader { display: none; justify-content: center; padding: 40px 0 0; }
     #scroll-loader.visible { display: flex; }
-
     .loader-dots { display: flex; gap: 6px; align-items: center; }
-
-    .loader-dots span {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--gold);
-      opacity: 0.4;
-      animation: dot-pulse 1.2s infinite;
-    }
-
+    .loader-dots span { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); opacity: 0.4; animation: dot-pulse 1.2s infinite; }
     .loader-dots span:nth-child(2) { animation-delay: 0.2s; }
     .loader-dots span:nth-child(3) { animation-delay: 0.4s; }
 
-    @keyframes dot-pulse {
-      0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
-      40%           { opacity: 0.8; transform: scale(1); }
-    }
+    @keyframes dot-pulse { 0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); } 40% { opacity: 0.8; transform: scale(1); } }
 
-    /* ── STATES ── */
-    #error-state {
-      display: none;
-      text-align: center;
-      padding: 80px 20px;
-      color: var(--text-muted);
-    }
-
+    #error-state { display: none; text-align: center; padding: 80px 20px; color: var(--text-muted); }
     #error-state.visible { display: block; }
     #error-state p { margin-bottom: 16px; font-size: 13px; }
-
-    #error-state a {
-      color: var(--gold);
-      text-decoration: none;
-      letter-spacing: 0.06em;
-      font-size: 11px;
-      text-transform: uppercase;
-    }
-
-    #empty-state {
-      display: none;
-      text-align: center;
-      padding: 80px 20px;
-      color: var(--text-muted);
-      font-size: 13px;
-    }
-
+    #error-state a { color: var(--gold); text-decoration: none; letter-spacing: 0.06em; font-size: 11px; text-transform: uppercase; }
+    #empty-state { display: none; text-align: center; padding: 80px 20px; color: var(--text-muted); font-size: 13px; }
     #empty-state.visible { display: block; }
 
-    /* ── MODAL ── */
-    #modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 600;
-      background: #0a0a0a;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-    }
-
+    #modal-overlay { display: none; position: fixed; inset: 0; z-index: 600; background: #0a0a0a; align-items: center; justify-content: center; padding: 0; }
     #modal-overlay.open { display: flex; }
 
-    .modal {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 70px 24px 24px;
-      position: relative;
-      background: transparent;
-      border-radius: 0;
-      max-width: none;
-      max-height: none;
-      overflow: visible;
-      box-shadow: none;
-    }
+    .modal { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 70px 24px 24px; position: relative; background: transparent; border-radius: 0; max-width: none; max-height: none; overflow: visible; box-shadow: none; }
 
-    .modal-close {
-      position: absolute;
-      top: 18px;
-      right: 20px;
-      z-index: 10;
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 15px;
-      transition: color var(--ease), border-color var(--ease);
-      line-height: 1;
-    }
-
+    .modal-close { position: absolute; top: 18px; right: 20px; z-index: 10; background: none; border: 1px solid var(--border); color: var(--text-muted); width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; transition: color var(--ease), border-color var(--ease); line-height: 1; }
     .modal-close:hover { color: var(--text-bright); border-color: var(--gold); }
 
-    .modal-left {
-      position: relative;
-      flex: 1 1 auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      max-width: 900px;
-      min-height: 0;
-      background: transparent;
-    }
+    .modal-left { position: relative; flex: 1 1 auto; display: flex; align-items: center; justify-content: center; width: 100%; max-width: 900px; min-height: 0; background: transparent; }
 
-    .modal-left img,
-    .modal-left video {
-      max-width: 100%;
-      max-height: 100%;
-      width: auto;
-      height: auto;
-      object-fit: contain;
-      display: block;
-      filter: blur(12px);
-      transition: filter 0.7s ease;
-    }
+    .modal-left img, .modal-left video { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; filter: blur(12px); transition: filter 0.7s ease; }
+    .modal-left img.loaded, .modal-left video.loaded { filter: blur(0); }
 
-    .modal-left img.loaded,
-    .modal-left video.loaded { filter: blur(0); }
-
-    .fullscreen-btn {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      background: rgba(0,0,0,0.6);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      width: 28px;
-      height: 28px;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 12px;
-      transition: color var(--ease), border-color var(--ease);
-    }
-
+    .fullscreen-btn { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); border: 1px solid var(--border); color: var(--text-muted); width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; transition: color var(--ease), border-color var(--ease); }
     .fullscreen-btn:hover { color: var(--gold); border-color: var(--gold); }
 
-    /* Gold rule between image and info */
-    .modal-gold-rule {
-      width: 100%;
-      max-width: 900px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--gold), transparent);
-      opacity: 0.25;
-      flex-shrink: 0;
-      margin: 0;
-    }
+    .modal-gold-rule { width: 100%; max-width: 900px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity: 0.25; flex-shrink: 0; margin: 0; }
 
-    .modal-right {
-      flex-shrink: 0;
-      width: 100%;
-      max-width: 900px;
-      padding: 20px 0 0;
-      display: flex;
-      flex-direction: row;
-      align-items: flex-start;
-      gap: 40px;
-      overflow: visible;
-    }
+    .modal-right { flex-shrink: 0; width: 100%; max-width: 900px; padding: 20px 0 0; display: flex; flex-direction: row; align-items: flex-start; gap: 40px; overflow: visible; }
 
-    .modal-info-left {
-      flex: 1;
-      min-width: 0;
-      overflow-y: auto;
-      max-height: 36vh;
-      padding-right: 16px;
-    }
+    .modal-info-left { flex: 1; min-width: 0; overflow-y: auto; max-height: 36vh; padding-right: 16px; }
 
-    .modal-title {
-      font-family: var(--font-serif);
-      font-size: clamp(16px, 2.5vw, 22px);
-      font-weight: 400;
-      color: var(--text-bright);
-      margin-bottom: 8px;
-    }
-
-    .modal-description {
-      font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.75;
-      white-space: pre-line;
-      margin-bottom: 10px;
-    }
-
-    .modal-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 8px;
-    }
-
-    .modal-meta-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 11px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 6px;
-    }
-
+    .modal-title { font-family: var(--font-serif); font-size: clamp(16px, 2.5vw, 22px); font-weight: 400; color: var(--text-bright); margin-bottom: 8px; }
+    .modal-description { font-size: 12px; color: var(--text-muted); line-height: 1.75; white-space: pre-line; margin-bottom: 10px; }
+    .modal-meta { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+    .modal-meta-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
     .modal-meta-row:last-child { border-bottom: none; padding-bottom: 0; }
-
-    .modal-meta-label {
-      color: var(--text-faint);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 10px;
-    }
-
+    .modal-meta-label { color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; font-size: 10px; }
     .modal-meta-value { color: var(--text-bright); font-weight: 400; }
     .modal-meta-value.owned { color: #a8c5a0; }
-
-    .modal-meta-link {
-      color: var(--gold);
-      font-weight: 400;
-      text-decoration: none;
-      font-size: 11px;
-    }
-
+    .modal-meta-link { color: var(--gold); font-weight: 400; text-decoration: none; font-size: 11px; }
     .modal-meta-link:hover { opacity: 0.8; }
 
-    .modal-price-actions {
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      min-width: 180px;
-    }
+    .modal-price-actions { flex-shrink: 0; display: flex; flex-direction: column; gap: 14px; min-width: 180px; }
+    .modal-price { font-size: 22px; font-weight: 400; color: var(--text-bright); }
+    .modal-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+    .modal-actions .btn-primary, .modal-actions .btn-secondary { width: 100%; padding: 12px 24px; font-size: 12px; text-align: center; white-space: nowrap; }
+    .modal-actions .btn-share { width: 100%; justify-content: center; padding: 10px 20px; }
 
-    .modal-price {
-      font-size: 22px;
-      font-weight: 400;
-      color: var(--text-bright);
-    }
-
-    .modal-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      width: 100%;
-    }
-
-    .modal-actions .btn-primary,
-    .modal-actions .btn-secondary {
-      width: 100%;
-      padding: 12px 24px;
-      font-size: 12px;
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    .modal-actions .btn-share {
-      width: 100%;
-      justify-content: center;
-      padding: 10px 20px;
-    }
-
-    /* Primary buy button */
-    .btn-primary {
-      background: transparent;
-      color: var(--gold);
-      border: 1px solid var(--gold-dim);
-      border-radius: var(--radius-btn);
-      padding: 12px 24px;
-      font-family: var(--font-sans);
-      font-size: 12px;
-      font-weight: 400;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: all var(--ease);
-      width: 100%;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn-primary::after {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%;
-      width: 60%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent);
-      animation: shimmer 2.5s infinite;
-    }
-
-    .btn-primary:hover {
-      border-color: var(--gold);
-      box-shadow: 0 0 16px var(--gold-glow);
-    }
-
+    .btn-primary { background: transparent; color: var(--gold); border: 1px solid var(--gold-dim); border-radius: var(--radius-btn); padding: 12px 24px; font-family: var(--font-sans); font-size: 12px; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all var(--ease); width: 100%; position: relative; overflow: hidden; }
+    .btn-primary::after { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent); animation: shimmer 2.5s infinite; }
+    .btn-primary:hover { border-color: var(--gold); box-shadow: 0 0 16px var(--gold-glow); }
     .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
     .btn-primary:disabled::after { animation: none; }
 
-    .btn-secondary {
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-btn);
-      padding: 11px 24px;
-      font-family: var(--font-sans);
-      font-size: 12px;
-      font-weight: 400;
-      letter-spacing: 0.06em;
-      cursor: pointer;
-      transition: all var(--ease);
-      width: 100%;
-      text-decoration: none;
-      text-align: center;
-      display: block;
-    }
-
+    .btn-secondary { background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 11px 24px; font-family: var(--font-sans); font-size: 12px; font-weight: 400; letter-spacing: 0.06em; cursor: pointer; transition: all var(--ease); width: 100%; text-decoration: none; text-align: center; display: block; }
     .btn-secondary:hover { border-color: var(--text-faint); color: var(--text-bright); }
 
-    .modal-tag-not-listed {
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-faint);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-btn);
-      padding: 5px 14px;
-      text-align: center;
-    }
+    .modal-tag-not-listed { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 5px 14px; text-align: center; }
+    .modal-disclaimer { font-size: 10px; color: var(--text-faint); line-height: 1.6; border-top: 1px solid var(--border); padding-top: 16px; }
 
-    .modal-disclaimer {
-      font-size: 10px;
-      color: var(--text-faint);
-      line-height: 1.6;
-      border-top: 1px solid var(--border);
-      padding-top: 16px;
-    }
-
-    /* ── TX STATUS ── */
-    #tx-status {
-      display: none;
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 700;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-btn);
-      padding: 10px 20px;
-      font-size: 12px;
-      color: var(--text-bright);
-      white-space: nowrap;
-      letter-spacing: 0.04em;
-    }
-
+    #tx-status { display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 700; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 10px 20px; font-size: 12px; color: var(--text-bright); white-space: nowrap; letter-spacing: 0.04em; }
     #tx-status.visible { display: block; }
     #tx-status.success { border-color: #4a7a46; color: #a8c5a0; }
     #tx-status.error   { border-color: #7a4646; color: #c5a0a0; }
 
-    /* Share button */
-    .btn-share {
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-btn);
-      padding: 9px 24px;
-      font-family: var(--font-sans);
-      font-size: 12px;
-      font-weight: 400;
-      cursor: pointer;
-      transition: all var(--ease);
-      width: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      letter-spacing: 0.04em;
-    }
-
+    .btn-share { background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 9px 24px; font-family: var(--font-sans); font-size: 12px; font-weight: 400; cursor: pointer; transition: all var(--ease); width: 50%; display: flex; align-items: center; justify-content: center; gap: 6px; letter-spacing: 0.04em; }
     .btn-share:hover { border-color: var(--text-faint); color: var(--text-bright); }
 
-    .share-toast {
-      font-size: 11px;
-      color: #a8c5a0;
-      text-align: center;
-      height: 0;
-      overflow: hidden;
-      transition: height 0.2s ease, opacity 0.2s ease;
-      opacity: 0;
-    }
-
+    .share-toast { font-size: 11px; color: #a8c5a0; text-align: center; height: 0; overflow: hidden; transition: height 0.2s ease, opacity 0.2s ease; opacity: 0; }
     .share-toast.visible { height: 18px; opacity: 1; }
 
-    /* ── FOOTER ── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 28px 28px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .footer-title {
-      font-size: 11px;
-      font-weight: 400;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-
+    footer { border-top: 1px solid var(--border); padding: 28px 28px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .footer-title { font-size: 11px; font-weight: 400; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); }
     .footer-title span { font-weight: 200; }
-
-    .footer-tagline {
-      font-size: 10px;
-      color: var(--text-faint);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    .footer-links {
-      display: flex;
-      gap: 20px;
-      margin-top: 4px;
-    }
-
-    .footer-links a {
-      font-size: 10px;
-      color: var(--text-faint);
-      text-decoration: none;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      transition: color var(--ease);
-    }
-
+    .footer-tagline { font-size: 10px; color: var(--text-faint); letter-spacing: 0.1em; text-transform: uppercase; }
+    .footer-links { display: flex; gap: 20px; margin-top: 4px; flex-wrap: wrap; justify-content: center; }
+    .footer-links a { font-size: 10px; color: var(--text-faint); text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase; transition: color var(--ease); }
     .footer-links a:hover { color: var(--gold); }
 
-    /* ── iOS WALLET MODAL ── */
-    #ios-wallet-modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 700;
-      background: rgba(0,0,0,0.9);
-      align-items: flex-end;
-      justify-content: center;
-      padding: 0;
-    }
-
+    #ios-wallet-modal { display: none; position: fixed; inset: 0; z-index: 700; background: rgba(0,0,0,0.9); align-items: flex-end; justify-content: center; padding: 0; }
     #ios-wallet-modal.open { display: flex; }
+    .ios-wallet-sheet { background: var(--surface); border-radius: 12px 12px 0 0; width: 100%; max-width: 480px; padding: 24px 24px 40px; display: flex; flex-direction: column; gap: 16px; }
+    .ios-wallet-title { font-size: 11px; color: var(--text-muted); text-align: center; letter-spacing: 0.1em; text-transform: uppercase; }
+    .ios-wallet-btn { background: transparent; color: var(--gold); border: 1px solid var(--gold-dim); border-radius: var(--radius-btn); padding: 14px 24px; font-family: var(--font-sans); font-size: 13px; font-weight: 400; cursor: pointer; width: 100%; letter-spacing: 0.06em; position: relative; overflow: hidden; }
+    .ios-wallet-btn::after { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent); animation: shimmer 2.5s infinite; }
+    .ios-wallet-cancel { background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 12px 24px; font-family: var(--font-sans); font-size: 12px; cursor: pointer; width: 100%; }
+    .ios-wallet-hint { font-size: 11px; color: var(--text-faint); text-align: center; line-height: 1.5; }
 
-    .ios-wallet-sheet {
-      background: var(--surface);
-      border-radius: 12px 12px 0 0;
-      width: 100%;
-      max-width: 480px;
-      padding: 24px 24px 40px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .ios-wallet-title {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-align: center;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    .ios-wallet-btn {
-      background: transparent;
-      color: var(--gold);
-      border: 1px solid var(--gold-dim);
-      border-radius: var(--radius-btn);
-      padding: 14px 24px;
-      font-family: var(--font-sans);
-      font-size: 13px;
-      font-weight: 400;
-      cursor: pointer;
-      width: 100%;
-      letter-spacing: 0.06em;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .ios-wallet-btn::after {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%;
-      width: 60%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent);
-      animation: shimmer 2.5s infinite;
-    }
-
-    .ios-wallet-cancel {
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-btn);
-      padding: 12px 24px;
-      font-family: var(--font-sans);
-      font-size: 12px;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    .ios-wallet-hint {
-      font-size: 11px;
-      color: var(--text-faint);
-      text-align: center;
-      line-height: 1.5;
-    }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 1100px) {
-      .grid { grid-template-columns: repeat(2, 1fr); }
-    }
+    @media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, 1fr); } }
 
     @media (max-width: 700px) {
       header { padding: 0 16px; }
@@ -1003,30 +382,30 @@
       .modal-right { flex-direction: column; gap: 16px; overflow: visible; }
       .modal-info-left { max-height: none; overflow-y: visible; padding-right: 0; }
       .modal-price-actions { min-width: unset; width: 100%; }
-      .modal-actions .btn-primary,
-      .modal-actions .btn-secondary,
-      .modal-actions .btn-share { width: 100%; white-space: nowrap; }
+      .modal-actions .btn-primary, .modal-actions .btn-secondary, .modal-actions .btn-share { width: 100%; white-space: nowrap; }
       .modal-close { top: 10px; right: 10px; }
       .wallet-info { display: none !important; }
       .btn-back span { display: none; }
     }
 
+    /* ── FIX 3: 2-col mobile card bottom layout ── */
     @media (max-width: 480px) {
       .pill { font-size: 11px; padding: 4px 11px; }
       .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .card-bottom { flex-direction: column; align-items: flex-start; gap: 6px; }
+      .card-price { font-size: 12px; }
+      .card-bottom .btn-buy-card { align-self: flex-end; padding: 5px 12px; font-size: 10px; }
+      .tag-primary, .tag-secondary, .tag-not-listed { font-size: 9px; padding: 2px 8px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
       .card { transition: none; opacity: 1; transform: none; }
-      .btn-primary::after, .btn-buy-card::after,
-      #connect-btn::after, .ios-wallet-btn::after,
-      .tag-primary::after { animation: none; }
+      .btn-primary::after, .btn-buy-card::after, #connect-btn::after, .ios-wallet-btn::after, .tag-primary::after { animation: none; }
     }
   </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
   <a class="site-title" href="https://328photography.xyz">
     <span class="site-title-num">328 </span><span class="site-title-word">Photography</span>
@@ -1043,7 +422,6 @@
   </div>
 </header>
 
-<!-- MAIN -->
 <main>
   <div class="controls">
     <div class="control-row">
@@ -1067,9 +445,7 @@
   </div>
 
   <p class="enlarge-hint">Click any image to enlarge</p>
-
   <div class="grid" id="grid"></div>
-
   <div id="scroll-loader"><div class="loader-dots"><span></span><span></span><span></span></div></div>
   <div id="error-state">
     <p>Unable to load tokens right now.</p>
@@ -1078,7 +454,6 @@
   <div id="empty-state"><p>No tokens found.</p></div>
 </main>
 
-<!-- FOOTER -->
 <footer>
   <div class="footer-title"><span>328 </span>Photography</div>
   <div class="footer-tagline">Monochromatic Moments Of Stolen Time</div>
@@ -1091,7 +466,6 @@
   </div>
 </footer>
 
-<!-- MODAL -->
 <div id="modal-overlay" role="dialog" aria-modal="true">
   <div class="modal" id="modal">
     <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
@@ -1104,9 +478,7 @@
         <h2 class="modal-title" id="modal-title"></h2>
         <p class="modal-description" id="modal-description"></p>
         <div class="modal-meta" id="modal-meta"></div>
-        <p class="modal-disclaimer">
-          Purchases processed via Objkt's contracts. By purchasing you agree to Objkt's terms.
-        </p>
+        <p class="modal-disclaimer">Purchases processed via Objkt's contracts. By purchasing you agree to Objkt's terms.</p>
       </div>
       <div class="modal-price-actions">
         <div id="modal-price-wrap"></div>
@@ -1116,10 +488,8 @@
   </div>
 </div>
 
-<!-- TX STATUS -->
 <div id="tx-status"></div>
 
-<!-- iOS WALLET MODAL -->
 <div id="ios-wallet-modal">
   <div class="ios-wallet-sheet">
     <p class="ios-wallet-title">Connect Wallet</p>
@@ -1132,7 +502,6 @@
 <script>
 const CREATOR      = 'tz1aACaaDefdyjVduoFyUi9Rhde6nsmhHunw';
 const OBJKT_GRAPHQL = 'https://data.objkt.com/v3/graphql';
-const OBJKT_PROFILE = 'https://objkt.com/tokens/';
 const PAGE_SIZE    = 20;
 const MUTEZ        = 1_000_000;
 
@@ -1271,11 +640,15 @@ function buildCard(token) {
   if (listed) {
     const isPrimary = token.listings_active[0].seller_address === CREATOR;
     const isSeller  = walletPkh && token.listings_active[0].seller_address === walletPkh;
+
     const priceWrap = document.createElement('div');
-    priceWrap.style.cssText = 'display:flex;align-items:center;gap:8px;';
+    /* FIX 2: allow priceWrap to shrink and not overflow */
+    priceWrap.style.cssText = 'display:flex;align-items:center;gap:6px;flex-shrink:1;min-width:0;flex-wrap:wrap;';
+
     const priceEl = document.createElement('span'); priceEl.className = 'card-price'; priceEl.textContent = `${price} XTZ`;
     const saleTag = document.createElement('span'); saleTag.className = isPrimary ? 'tag-primary' : 'tag-secondary'; saleTag.textContent = isPrimary ? 'Primary' : 'Secondary';
     priceWrap.appendChild(priceEl); priceWrap.appendChild(saleTag); bottom.appendChild(priceWrap);
+
     if (!isSeller) {
       const buyBtn = document.createElement('button'); buyBtn.className = 'btn-buy-card'; buyBtn.textContent = 'Buy';
       buyBtn.addEventListener('click', e => { e.stopPropagation(); handleBuy(token); });
