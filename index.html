@@ -169,7 +169,7 @@
     .control-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 16px;
       flex-wrap: wrap;
     }
 
@@ -178,8 +178,9 @@
       color: var(--text-faint);
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      width: 36px;
+      width: 52px;
       flex-shrink: 0;
+      text-align: right;
     }
 
     .pill-group { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -227,8 +228,8 @@
       background: rgba(10,10,10,0.97);
       flex-direction: column;
       align-items: flex-end;
-      justify-content: center;
-      padding: 60px 48px;
+      justify-content: flex-start;
+      padding: 80px 48px 60px;
     }
     #project-overlay.open { display: flex; }
 
@@ -584,7 +585,7 @@
       .modal-close { top: 10px; right: 10px; }
       .wallet-info { display: none !important; }
       .btn-back span { display: none; }
-      #project-overlay { padding: 60px 28px; }
+      #project-overlay { padding: 72px 28px 40px; }
     }
 
     @media (max-width: 480px) {
