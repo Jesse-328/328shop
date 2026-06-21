@@ -777,17 +777,18 @@ const projectOverlay       = document.getElementById('project-overlay');
 const projectTrigger       = document.getElementById('project-trigger');
 const projectLabel         = document.getElementById('project-label');
 
-// ── FIX: Read ?wallet= param from URL (set by gallery's "View in Shop" link)
-// This runs synchronously before init() so CREATOR and the UI are correct
-// before any tokens are fetched. Only applies when arriving from the gallery.
+// ── Read ?wallet= param from URL.
+// The gallery sets this on "View in Shop" links: /token/<contract>/<id>?wallet=<tz1...>
+// token.js forwards it through its redirect as: /?token=<contract>/<id>&wallet=<tz1...>
+// Either way ?wallet= arrives in window.location.search and is read here
+// synchronously before init() runs, so CREATOR and the UI are correct
+// before any tokens are fetched.
 (function applyWalletParam() {
-  const params     = new URLSearchParams(window.location.search);
+  const params      = new URLSearchParams(window.location.search);
   const walletParam = params.get('wallet');
   if (walletParam && WALLETS[walletParam]) {
     CREATOR = walletParam;
-    // Update the project pill label
     projectLabel.textContent = WALLETS[walletParam];
-    // Update active state in the project overlay
     document.querySelectorAll('.project-nav-item').forEach(item => {
       item.classList.toggle('active', item.dataset.wallet === walletParam);
     });
@@ -1110,11 +1111,13 @@ window.addEventListener('popstate', () => {
 });
 
 function openTokenFromPath() {
+  // Path-based deep link: /token/<contract>/<id>[?wallet=...]
   const parts = window.location.pathname.split('/').filter(Boolean);
   if (parts[0] === 'token' && parts.length >= 3) {
     const token = allTokens.find(t => t.fa?.contract === parts[1] && String(t.token_id) === String(parts[2]));
     if (token) { openModal(token); return; }
   }
+  // Query-param deep link: ?token=<contract>/<id>[&wallet=...] (from token.js redirect)
   const params = new URLSearchParams(window.location.search);
   const tokenParam = params.get('token');
   if (tokenParam) {
