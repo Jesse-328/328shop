@@ -201,8 +201,7 @@
     .pill:hover { border-color: var(--text-faint); color: var(--text-bright); }
     .pill.active { background: transparent; color: var(--gold); border-color: var(--gold); font-weight: 500; }
 
-    /* ── PROJECT PILL (trigger) ── */
-    /* Same pill styles apply; this one also has a tiny chevron */
+    /* ── PROJECT PILL ── */
     .pill-project {
       display: flex;
       align-items: center;
@@ -576,10 +575,11 @@
     @media (max-width: 700px) {
       header { padding: 0 16px; }
       main { padding: 24px 16px 60px; }
-      .grid { grid-template-columns: 1fr; gap: 16px; }
+      .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      /* Modal: scrollable column layout on mobile */
       .modal { padding: 60px 16px 16px; justify-content: flex-start; overflow-y: auto; }
-      .modal-left { flex: none; min-height: 240px; max-height: 45vh; }
-      .modal-right { flex-direction: column; gap: 16px; }
+      .modal-left { flex: none; min-height: 220px; max-height: 42vh; }
+      .modal-right { flex-direction: column; gap: 16px; padding: 16px 0 0; }
       .modal-info-left { max-height: none; overflow-y: visible; padding-right: 0; }
       .modal-price-actions { min-width: unset; width: 100%; }
       .modal-close { top: 10px; right: 10px; }
@@ -629,7 +629,7 @@
 <main>
   <div class="controls">
 
-    <!-- ── PROJECT ROW (new) ── -->
+    <!-- PROJECT ROW -->
     <div class="control-row">
       <span class="control-label">Project</span>
       <div class="pill-group">
@@ -640,7 +640,6 @@
       </div>
     </div>
 
-    <!-- existing rows unchanged -->
     <div class="control-row">
       <span class="control-label">Sort</span>
       <div class="pill-group" id="sort-group">
@@ -778,6 +777,23 @@ const projectOverlay       = document.getElementById('project-overlay');
 const projectTrigger       = document.getElementById('project-trigger');
 const projectLabel         = document.getElementById('project-label');
 
+// ── FIX: Read ?wallet= param from URL (set by gallery's "View in Shop" link)
+// This runs synchronously before init() so CREATOR and the UI are correct
+// before any tokens are fetched. Only applies when arriving from the gallery.
+(function applyWalletParam() {
+  const params     = new URLSearchParams(window.location.search);
+  const walletParam = params.get('wallet');
+  if (walletParam && WALLETS[walletParam]) {
+    CREATOR = walletParam;
+    // Update the project pill label
+    projectLabel.textContent = WALLETS[walletParam];
+    // Update active state in the project overlay
+    document.querySelectorAll('.project-nav-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.wallet === walletParam);
+    });
+  }
+})();
+
 // ── PROJECT OVERLAY ──
 function openProjectOverlay() {
   projectOverlay.classList.add('open');
@@ -811,17 +827,12 @@ document.getElementById('project-nav').addEventListener('click', e => {
   const wallet = item.dataset.wallet;
   const label  = item.dataset.label;
 
-  // Update active state in overlay
   document.querySelectorAll('.project-nav-item').forEach(i => i.classList.remove('active'));
   item.classList.add('active');
 
-  // Update pill label
   projectLabel.textContent = label;
-
-  // Switch creator wallet
   CREATOR = wallet;
 
-  // Reset view filter to all (owned filter is personal wallet, still valid)
   if (currentFilter === 'primary' || currentFilter === 'secondary') {
     currentFilter = 'all';
     document.querySelectorAll('#filter-group .pill').forEach(p => p.classList.toggle('active', p.dataset.filter === 'all'));
@@ -829,7 +840,6 @@ document.getElementById('project-nav').addEventListener('click', e => {
 
   closeProjectOverlay();
 
-  // Reload tokens for new wallet
   if (walletPkh) {
     fetchAllTokensWithWallet();
   } else {
@@ -1051,8 +1061,12 @@ function openModal(token) {
   shareRow.appendChild(shareBtn); modalActions.appendChild(shareRow);
   const shareToast = document.createElement('div'); shareToast.className = 'share-toast'; shareToast.id = 'share-toast'; shareToast.textContent = 'Link copied to clipboard';
   modalActions.appendChild(shareToast);
+
+  // Share button copies a URL that includes the wallet param so the project
+  // context is preserved when the link is opened by someone else.
   shareBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(window.location.href).then(() => {
+    const shareUrl = `${window.location.origin}/token/${token.fa?.contract}/${token.token_id}?wallet=${CREATOR}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
       shareToast.classList.add('visible');
       setTimeout(() => shareToast.classList.remove('visible'), 2000);
     });
@@ -1060,7 +1074,8 @@ function openModal(token) {
 
   modalOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
-  const path = `/token/${token.fa?.contract}/${token.token_id}`;
+  // Push URL with wallet param so the project context survives a page refresh
+  const path = `/token/${token.fa?.contract}/${token.token_id}?wallet=${CREATOR}`;
   history.pushState({ token: path }, '', path);
 }
 
@@ -1070,7 +1085,12 @@ function closeModal() {
   currentToken = null;
   const vid = modalMediaWrap.querySelector('video');
   if (vid) vid.pause();
-  history.pushState({}, '', '/');
+  // Preserve wallet param in URL when closing the modal so a refresh
+  // still loads the correct project.
+  const walletParam = CREATOR !== 'tz1aACaaDefdyjVduoFyUi9Rhde6nsmhHunw'
+    ? `?wallet=${CREATOR}`
+    : '';
+  history.pushState({}, '', '/' + walletParam);
 }
 
 modalClose.addEventListener('click', closeModal);
