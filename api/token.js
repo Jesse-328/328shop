@@ -1,18 +1,14 @@
 export const config = { runtime: 'edge' };
-
 export default async function handler(req) {
   const url = new URL(req.url);
   const contract = url.searchParams.get('contract') || url.pathname.split('/')[2];
   const tokenId = url.searchParams.get('tokenId') || url.pathname.split('/')[3];
-
   if (!contract || !tokenId) {
     return new Response('Not found', { status: 404 });
   }
-
   let tokenName = '328 Photography';
   let tokenDescription = 'NFT Shop — 328photography.xyz';
   let tokenImage = 'https://328photography.xyz/wp-content/uploads/2024/01/logo.png';
-
   try {
     const query = `
       query {
@@ -27,22 +23,18 @@ export default async function handler(req) {
         }
       }
     `;
-
     const res = await fetch('https://data.objkt.com/v3/graphql', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query })
     });
-
     const data = await res.json();
     const token = data?.data?.token?.[0];
-
     if (token) {
       tokenName = token.name || tokenName;
       tokenDescription = token.description
         ? token.description.slice(0, 200)
         : '328 Photography — NFT Shop';
-
       // Try thumbnail_uri first (smaller, faster), then display_uri
       const imageUri = token.thumbnail_uri || token.display_uri;
       if (imageUri) {
@@ -54,13 +46,12 @@ export default async function handler(req) {
   } catch (e) {
     // Fall through to defaults
   }
-
   const shopUrl = `https://shop.328photography.xyz/token/${contract}/${tokenId}`;
-  const redirectUrl = `https://shop.328photography.xyz/?token=${contract}/${tokenId}`;
-
+  // Forward ?wallet= param so the shop loads the correct project after redirect
+  const walletParam = url.searchParams.get('wallet') ? `&wallet=${url.searchParams.get('wallet')}` : '';
+  const redirectUrl = `https://shop.328photography.xyz/?token=${contract}/${tokenId}${walletParam}`;
   const safeName = tokenName.replace(/"/g, '&quot;').replace(/</g, '&lt;');
   const safeDesc = tokenDescription.replace(/"/g, '&quot;').replace(/</g, '&lt;');
-
   const html = `<!DOCTYPE html>
 <html>
 <head>
@@ -79,11 +70,10 @@ export default async function handler(req) {
   <meta name="twitter:description" content="${safeDesc}" />
   <meta name="twitter:image" content="${tokenImage}" />
   <meta http-equiv="refresh" content="0;url=${redirectUrl}" />
-  <script>window.location.replace('${redirectUrl}');</script>
+  <script>window.location.replace('${redirectUrl}');<\/script>
 </head>
 <body></body>
 </html>`;
-
   return new Response(html, {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
