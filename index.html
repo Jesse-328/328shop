@@ -468,7 +468,7 @@
 
     .modal-price-actions { flex-shrink: 0; display: flex; flex-direction: column; gap: 14px; min-width: 180px; }
     .modal-price { font-size: 22px; font-weight: 400; color: var(--text-bright); }
-    .modal-usd { font-size: 12px; font-weight: 400; color: var(--text-mid); margin-top: -8px; }
+    .modal-usd { font-size: 12px; font-weight: 400; color: var(--text-mid); margin-top: 4px; }
     .modal-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; }
     .modal-actions .btn-primary, .modal-actions .btn-secondary { width: 100%; padding: 12px 24px; font-size: 12px; text-align: center; white-space: nowrap; }
     .modal-actions .btn-share { width: 100%; justify-content: center; padding: 10px 20px; }
@@ -983,7 +983,7 @@ function buildCard(token) {
     priceEl.textContent = `${price} XTZ`;
     if (usd) {
       const sep = document.createTextNode(' · ');
-      const usdSpan = document.createElement('span'); usdSpan.textContent = usd;
+      const usdSpan = document.createElement('span'); usdSpan.textContent = usd + ' USD';
       priceEl.appendChild(sep); priceEl.appendChild(usdSpan);
     }
     bottom.appendChild(priceEl);
@@ -1068,7 +1068,7 @@ function openModal(token) {
     // ── MODAL USD conversion (between price row and BUY button) ──
     const usd = toUsd(price);
     if (usd) {
-      const usdEl = document.createElement('div'); usdEl.className = 'modal-usd'; usdEl.textContent = usd;
+      const usdEl = document.createElement('div'); usdEl.className = 'modal-usd'; usdEl.textContent = usd + ' USD';
       modalPriceWrap.appendChild(usdEl);
     }
   }
