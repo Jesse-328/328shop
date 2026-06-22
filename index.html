@@ -770,7 +770,7 @@ async function fetchXtzRate() {
 
 function toUsd(xtzAmount) {
   if (!xtzUsdRate || !xtzAmount) return null;
-  return '$' + (parseFloat(xtzAmount) * xtzUsdRate).toFixed(2);
+  return '$' + (parseFloat(xtzAmount) * xtzUsdRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 const grid                 = document.getElementById('grid');
