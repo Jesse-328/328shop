@@ -468,6 +468,7 @@
 
     .modal-price-actions { flex-shrink: 0; display: flex; flex-direction: column; gap: 14px; min-width: 180px; }
     .modal-price { font-size: 22px; font-weight: 400; color: var(--text-bright); }
+    .modal-usd { font-size: 12px; font-weight: 400; color: var(--text-mid); margin-top: -8px; }
     .modal-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; }
     .modal-actions .btn-primary, .modal-actions .btn-secondary { width: 100%; padding: 12px 24px; font-size: 12px; text-align: center; white-space: nowrap; }
     .modal-actions .btn-share { width: 100%; justify-content: center; padding: 10px 20px; }
@@ -754,6 +755,24 @@ let currentSort = 'newest', currentFilter = 'all';
 let walletAddress = null, walletPkh = null;
 let beaconClient = null, currentToken = null, isLoading = false;
 
+// ── XTZ/USD RATE ──
+let xtzUsdRate = null;
+
+async function fetchXtzRate() {
+  try {
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tezos&vs_currencies=usd');
+    const data = await res.json();
+    xtzUsdRate = data?.tezos?.usd || null;
+  } catch(e) {
+    xtzUsdRate = null;
+  }
+}
+
+function toUsd(xtzAmount) {
+  if (!xtzUsdRate || !xtzAmount) return null;
+  return '$' + (parseFloat(xtzAmount) * xtzUsdRate).toFixed(2);
+}
+
 const grid                 = document.getElementById('grid');
 const scrollLoader         = document.getElementById('scroll-loader');
 const errorState           = document.getElementById('error-state');
@@ -778,11 +797,6 @@ const projectTrigger       = document.getElementById('project-trigger');
 const projectLabel         = document.getElementById('project-label');
 
 // ── Read ?wallet= param from URL.
-// The gallery sets this on "View in Shop" links: /token/<contract>/<id>?wallet=<tz1...>
-// token.js forwards it through its redirect as: /?token=<contract>/<id>&wallet=<tz1...>
-// Either way ?wallet= arrives in window.location.search and is read here
-// synchronously before init() runs, so CREATOR and the UI are correct
-// before any tokens are fetched.
 (function applyWalletParam() {
   const params      = new URLSearchParams(window.location.search);
   const walletParam = params.get('wallet');
@@ -962,7 +976,18 @@ function buildCard(token) {
     const editionsEl = document.createElement('span'); editionsEl.className = 'card-meta'; editionsEl.textContent = `${editions} edition${editions !== 1 ? 's' : ''}`;
     const saleTag   = document.createElement('span'); saleTag.className = isPrimary ? 'tag-primary' : 'tag-secondary'; saleTag.textContent = isPrimary ? 'Primary' : 'Secondary';
     metaRow.appendChild(editionsEl); metaRow.appendChild(saleTag); bottom.appendChild(metaRow);
-    const priceEl = document.createElement('div'); priceEl.className = 'card-price'; priceEl.textContent = `${price} XTZ`; bottom.appendChild(priceEl);
+
+    // ── CARD PRICE ROW with inline USD conversion ──
+    const priceEl = document.createElement('div'); priceEl.className = 'card-price';
+    const usd = toUsd(price);
+    priceEl.textContent = `${price} XTZ`;
+    if (usd) {
+      const sep = document.createTextNode(' · ');
+      const usdSpan = document.createElement('span'); usdSpan.textContent = usd;
+      priceEl.appendChild(sep); priceEl.appendChild(usdSpan);
+    }
+    bottom.appendChild(priceEl);
+
     if (!isSeller) {
       const buyBtn = document.createElement('button'); buyBtn.className = 'btn-buy-card'; buyBtn.textContent = 'Buy';
       buyBtn.addEventListener('click', e => { e.stopPropagation(); handleBuy(token); });
@@ -1033,10 +1058,19 @@ function openModal(token) {
   modalPriceWrap.innerHTML = '';
   if (listed) {
     const isPrimary = token.listings_active[0].seller_address === CREATOR;
+
+    // ── MODAL PRICE: XTZ + badge ──
     const priceWrap = document.createElement('div'); priceWrap.style.cssText = 'display:flex;align-items:center;gap:10px;';
     const p = document.createElement('div'); p.className = 'modal-price'; p.textContent = `${price} XTZ`;
     const saleTag = document.createElement('span'); saleTag.className = isPrimary ? 'tag-primary' : 'tag-secondary'; saleTag.textContent = isPrimary ? 'Primary' : 'Secondary';
     priceWrap.appendChild(p); priceWrap.appendChild(saleTag); modalPriceWrap.appendChild(priceWrap);
+
+    // ── MODAL USD conversion (between price row and BUY button) ──
+    const usd = toUsd(price);
+    if (usd) {
+      const usdEl = document.createElement('div'); usdEl.className = 'modal-usd'; usdEl.textContent = usd;
+      modalPriceWrap.appendChild(usdEl);
+    }
   }
 
   modalActions.innerHTML = '';
@@ -1063,8 +1097,6 @@ function openModal(token) {
   const shareToast = document.createElement('div'); shareToast.className = 'share-toast'; shareToast.id = 'share-toast'; shareToast.textContent = 'Link copied to clipboard';
   modalActions.appendChild(shareToast);
 
-  // Share button copies a URL that includes the wallet param so the project
-  // context is preserved when the link is opened by someone else.
   shareBtn.addEventListener('click', () => {
     const shareUrl = `${window.location.origin}/token/${token.fa?.contract}/${token.token_id}?wallet=${CREATOR}`;
     navigator.clipboard.writeText(shareUrl).then(() => {
@@ -1075,7 +1107,6 @@ function openModal(token) {
 
   modalOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
-  // Push URL with wallet param so the project context survives a page refresh
   const path = `/token/${token.fa?.contract}/${token.token_id}?wallet=${CREATOR}`;
   history.pushState({ token: path }, '', path);
 }
@@ -1086,8 +1117,6 @@ function closeModal() {
   currentToken = null;
   const vid = modalMediaWrap.querySelector('video');
   if (vid) vid.pause();
-  // Preserve wallet param in URL when closing the modal so a refresh
-  // still loads the correct project.
   const walletParam = CREATOR !== 'tz1aACaaDefdyjVduoFyUi9Rhde6nsmhHunw'
     ? `?wallet=${CREATOR}`
     : '';
@@ -1111,13 +1140,11 @@ window.addEventListener('popstate', () => {
 });
 
 function openTokenFromPath() {
-  // Path-based deep link: /token/<contract>/<id>[?wallet=...]
   const parts = window.location.pathname.split('/').filter(Boolean);
   if (parts[0] === 'token' && parts.length >= 3) {
     const token = allTokens.find(t => t.fa?.contract === parts[1] && String(t.token_id) === String(parts[2]));
     if (token) { openModal(token); return; }
   }
-  // Query-param deep link: ?token=<contract>/<id>[&wallet=...] (from token.js redirect)
   const params = new URLSearchParams(window.location.search);
   const tokenParam = params.get('token');
   if (tokenParam) {
@@ -1284,7 +1311,7 @@ function ipfsToHttp(uri) { if (!uri) return ''; if (uri.startsWith('ipfs://')) r
 function truncateAddress(addr) { if (!addr) return ''; return addr.slice(0,6) + '…' + addr.slice(-4); }
 function shortHash(hash) { if (!hash) return '—'; return hash.slice(0,8) + '…' + hash.slice(-4); }
 
-async function init() { await initBeacon(); if (!walletPkh) await fetchAllTokens(); }
+async function init() { await fetchXtzRate(); await initBeacon(); if (!walletPkh) await fetchAllTokens(); }
 window.addEventListener('load', () => setTimeout(init, 500));
 </script>
 </body>
