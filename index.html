@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="328 Shop" />
   <meta name="format-detection" content="telephone=no" />
   <title>328 Photography — Shop</title>
-  <!-- v2.3 -->
+  <!-- v2.4 -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet" />
@@ -760,6 +760,14 @@ let currentSort = 'newest', currentFilter = 'all';
 let walletAddress = null, walletPkh = null;
 let beaconClient = null, currentToken = null, isLoading = false;
 
+// ── REFRESH STATE ──
+// guards so a background refresh never fights the user: skip while a modal is
+// open, a tx is mid-flight, or we refreshed very recently. fail-open throughout.
+let lastTokenRefresh = Date.now();
+let txInFlight = false;
+const PRICE_REFRESH_MS = 3 * 60 * 1000;   // re-pull XTZ→USD every 3 min
+const FOCUS_REFRESH_MIN_MS = 60 * 1000;   // min gap before a focus refresh re-fetches tokens
+
 // ── XTZ/USD RATE ──
 let xtzUsdRate = null;
 
@@ -897,6 +905,7 @@ async function fetchAllTokens() {
       return t.supply && t.supply > 0;
     });
     applyFilterAndSort();
+    lastTokenRefresh = Date.now();
   } catch(e) {
     console.error(e);
     grid.innerHTML = '';
@@ -935,6 +944,78 @@ function renderNextPage() {
   displayedCount += slice.length;
   scrollLoader.classList.remove('visible');
   observeCards();
+}
+
+// ── BACKGROUND REFRESH ──
+// re-render the current filtered list up to `count` cards, with no entry
+// animation and no scroll reset — cards appear already-visible so a silent
+// data swap doesn't flash or jump. used only by the background refresh path.
+function renderToDepth(count) {
+  grid.innerHTML = '';
+  const slice = filteredTokens.slice(0, count);
+  slice.forEach(token => {
+    const card = buildCard(token);
+    card.classList.add('visible');          // skip the fade-in on refresh
+    card.style.transitionDelay = '0s';
+    grid.appendChild(card);
+  });
+  displayedCount = slice.length;
+  scrollLoader.classList.remove('visible');
+}
+
+// quietly re-fetch tokens and re-render to the same depth the user was at,
+// preserving scroll position. bails if it's not a safe moment to swap.
+async function refreshTokensInBackground() {
+  // never disturb an open modal, an in-flight purchase, or the owned filter
+  // mid-interaction; also skip if the list is still doing its first paged load
+  if (currentToken || txInFlight || isLoading) return;
+  if (modalOverlay.classList.contains('open')) return;
+
+  const prevScroll = window.scrollY;
+  const prevDepth  = displayedCount;        // how many cards were on screen
+
+  try {
+    const query = walletPkh
+      ? `query($creator: String!, $wallet: String!) { token(where: { creators: { creator_address: { _eq: $creator } } } order_by: { timestamp: desc } limit: 500) { token_id name description display_uri artifact_uri mime supply timestamp fa { contract } listings_active(order_by: { price: asc }, limit: 1) { price bigmap_key marketplace_contract seller_address } holders(where: { holder_address: { _eq: $wallet }, quantity: { _gt: "0" } }) { quantity } } }`
+      : `query($creator: String!) { token(where: { creators: { creator_address: { _eq: $creator } } } order_by: { timestamp: desc } limit: 500) { token_id name description display_uri artifact_uri mime supply timestamp fa { contract } listings_active(order_by: { price: asc }, limit: 1) { price bigmap_key marketplace_contract seller_address } holders(where: { holder_address: { _eq: $creator }, quantity: { _gt: "0" } }) { quantity } } }`;
+    const variables = walletPkh ? { creator: CREATOR, wallet: walletPkh } : { creator: CREATOR };
+    const res  = await fetch(OBJKT_GRAPHQL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query, variables }) });
+    const data = await res.json();
+    if (data.errors) return;                 // fail-open: keep last good data
+    const raw = data.data?.token || [];
+    const seen = new Set();
+    const fresh = raw.filter(t => {
+      const key = `${t.fa?.contract}:${t.token_id}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return t.supply && t.supply > 0;
+    });
+
+    // re-check safety AFTER the await — the user may have opened a modal
+    // or started a purchase while the request was in flight
+    if (currentToken || txInFlight || modalOverlay.classList.contains('open')) return;
+
+    allTokens = fresh;
+    lastTokenRefresh = Date.now();
+
+    // rebuild the filtered/sorted list, then re-render to the same depth
+    let tokens = [...allTokens];
+    if (currentFilter === 'primary')        tokens = tokens.filter(t => t.listings_active?.length > 0 && t.listings_active[0].seller_address === CREATOR);
+    else if (currentFilter === 'secondary') tokens = tokens.filter(t => t.listings_active?.length > 0 && t.listings_active[0].seller_address !== CREATOR);
+    else if (currentFilter === 'owned' && walletPkh) tokens = tokens.filter(t => t.holders && t.holders.some(h => h.quantity > 0));
+    if (currentSort === 'newest')          tokens.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+    else if (currentSort === 'oldest')     tokens.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+    else if (currentSort === 'price-asc')  tokens.sort((a,b) => (a.listings_active?.[0]?.price ?? Infinity) - (b.listings_active?.[0]?.price ?? Infinity));
+    else if (currentSort === 'price-desc') tokens.sort((a,b) => (b.listings_active?.[0]?.price ?? -1) - (a.listings_active?.[0]?.price ?? -1));
+    filteredTokens = tokens;
+
+    if (filteredTokens.length === 0) return; // don't blank a populated view
+    renderToDepth(Math.min(prevDepth || PAGE_SIZE, filteredTokens.length));
+    observeCards();
+    window.scrollTo(0, prevScroll);          // hold their place
+  } catch (e) {
+    // network hiccup — silently keep the existing view
+  }
 }
 
 function observeCards() {
@@ -1228,10 +1309,26 @@ document.getElementById('ios-cancel-btn').addEventListener('click', () => {
 });
 
 document.addEventListener('visibilitychange', async () => {
-  if (!document.hidden && !walletPkh && beaconClient) {
+  if (document.hidden) return;
+
+  // existing behaviour: re-attach the wallet if it connected while backgrounded
+  if (!walletPkh && beaconClient) {
     try { const a = await beaconClient.getActiveAccount(); if (a) { walletPkh = a.address; await onWalletConnected(walletPkh); } } catch(e) {}
   }
+
+  // on returning to the tab, freshen the price (cheap, always safe) and — if it's
+  // been a while and nothing's mid-interaction — quietly refresh the listings
+  fetchXtzRate();
+  if (Date.now() - lastTokenRefresh > FOCUS_REFRESH_MIN_MS) {
+    refreshTokensInBackground();
+  }
 });
+
+// gentle price-only interval: keeps the USD conversion from going stale on a
+// long-lived tab. never rebuilds the grid, so it's safe even with a modal open.
+setInterval(() => {
+  if (!document.hidden) fetchXtzRate();
+}, PRICE_REFRESH_MS);
 
 async function onWalletConnected(pkh) {
   walletPkh = pkh;
@@ -1255,6 +1352,7 @@ async function fetchAllTokensWithWallet() {
     const raw = data.data.token || []; const seen = new Set();
     allTokens = raw.filter(t => { const key = `${t.fa?.contract}:${t.token_id}`; if (seen.has(key)) return false; seen.add(key); return t.supply && t.supply > 0; });
     applyFilterAndSort();
+    lastTokenRefresh = Date.now();
   } catch(e) { console.error(e); }
 }
 
@@ -1262,6 +1360,7 @@ async function handleBuy(token) {
   if (!walletPkh) { connectBtn.click(); return; }
   const listing = token.listings_active?.[0];
   if (!listing) return;
+  txInFlight = true;                          // pause background refresh during purchase
   showTxStatus('Waiting for wallet confirmation…', '');
   try {
     showTxStatus('Submitting transaction…', '');
@@ -1273,6 +1372,8 @@ async function handleBuy(token) {
     if (e.message?.includes('cancel') || e.message?.includes('aborted') || e.title?.includes('Aborted')) hideTxStatus();
     else if (JSON.stringify(e).includes('M_NO_SELF_FULFILL')) { showTxStatus('You cannot purchase your own listing.', 'error'); setTimeout(() => hideTxStatus(), 5000); }
     else { showTxStatus('Transaction failed. Please try again.', 'error'); setTimeout(() => hideTxStatus(), 5000); }
+  } finally {
+    txInFlight = false;
   }
 }
 
